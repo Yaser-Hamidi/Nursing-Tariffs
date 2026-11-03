@@ -1,0 +1,1392 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>محاسبه‌گر امتیاز و تعرفه عملکرد پرستاری - نسخه 2.4</title>
+<style>
+@font-face{
+  font-family:"Shabnam";
+  src:url("./shabnam.ttf") format("truetype");
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+}
+@font-face{
+  font-family:"Shabnam";
+  src:url("./shabnam_bold.ttf") format("truetype");
+  font-style:normal;
+  font-weight:700 900;
+  font-display:swap;
+}
+:root{--bg:#f4f7fb;--card:#fff;--ink:#182230;--muted:#617084;--line:#dce4ee;--blue:#175cd3;--blue2:#eaf2ff;--green:#067647;--greenbg:#ecfdf3;--red:#b42318;--redbg:#fef3f2;--amber:#92400e;--amberbg:#fffaeb;--shadow:0 10px 30px rgba(16,24,40,.06)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 "Shabnam",Tahoma,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;border:0;border-radius:10px;padding:10px 16px;font-weight:700}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:var(--blue);color:white}.secondary{background:#eef2f6;color:#243447;border:1px solid var(--line)}.danger{background:#fff0ef;color:var(--red);border:1px solid #fecdca}.wrap{max-width:1320px;margin:0 auto;padding:24px 18px 48px}.hero{background:linear-gradient(130deg,#143e79,#1769aa);color:#fff;padding:24px;border-radius:18px;box-shadow:var(--shadow);margin-bottom:18px}.hero h1{margin:0 0 6px;font-size:24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}.hero p{margin:0;color:#e4efff}.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}.panel h2{font-size:18px;margin:0 0 12px}.step{display:inline-flex;background:var(--blue2);color:#174ea6;border-radius:99px;padding:2px 10px;font-size:12px;font-weight:700;margin-left:8px}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.sub{color:var(--muted);font-size:13px}.pick{display:inline-flex;align-items:center;gap:8px}.filebox{display:none}.status{padding:11px 13px;border-radius:10px;background:#f8fafc;border:1px solid var(--line);color:#475467;margin-top:12px;white-space:pre-line}.status.ok{background:var(--greenbg);color:var(--green);border-color:#abefc6}.status.warn{background:var(--amberbg);color:var(--amber);border-color:#fedf89}.status.err{background:var(--redbg);color:var(--red);border-color:#fecdca}.settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:440px}th,td{text-align:right;padding:9px 11px;border-bottom:1px solid var(--line);white-space:nowrap}th{background:#f7f9fc;color:#364152;font-weight:700;font-size:13px}tbody tr:last-child td{border-bottom:0}td input{width:100%;min-width:80px;border:1px solid #cfd8e3;border-radius:7px;padding:6px 8px;background:white}td input.score-name{min-width:160px}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}.toolbar label{color:var(--muted);font-size:13px}.toolbar select{min-width:210px;border:1px solid var(--line);border-radius:9px;padding:9px;background:white}.chip{display:inline-block;padding:2px 8px;border-radius:99px;background:#f2f4f7;color:#475467;font-size:12px}.good{color:var(--green);font-weight:700}.bad{color:var(--red);font-weight:700}.section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}.empty{padding:22px;text-align:center;color:var(--muted)}.smallnote{font-size:12px;color:var(--muted)}.exclude-col{text-align:center}.exclude-col input{width:18px;min-width:18px;height:18px;cursor:pointer}details{margin-top:10px}summary{cursor:pointer;font-weight:700;color:#344054;padding:6px 0}
+
+/* لینک نام پرستاران و بخش‌ها بدون خط زیرین */
+.nurse-link-btn{background:none;border:none;padding:0;color:var(--blue);font-weight:700;cursor:pointer;text-align:right;font-size:inherit;text-decoration:none}
+.nurse-link-btn:hover{color:#0c3e92}
+
+/* استایل ردیف هشدار در جدول آمار */
+.warning-stat-row{background:var(--redbg)}
+.warning-stat-row td{color:var(--red)}
+.warning-link-btn{background:none;border:none;padding:0;color:var(--red);font-weight:800;cursor:pointer;font-size:inherit;text-decoration:underline;text-underline-offset:3px}
+.warning-link-btn:hover{color:#7a1209}
+
+/* کپسول‌های انتخاب بخش */
+.dept-filter-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 16px;padding:12px 14px;background:#f8fafc;border:1px solid var(--line);border-radius:14px}
+.dept-filter-label{font-size:13px;font-weight:700;color:#344054}
+.dept-capsules-wrap{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.dept-capsule{display:inline-flex;align-items:center;padding:5px 14px;border-radius:99px;border:1px solid var(--line);background:#fff;color:#344054;font-size:13px;font-weight:700;cursor:pointer;transition:all .18s;user-select:none}
+.dept-capsule:hover{background:#f2f4f7;border-color:#b9c8de}
+.dept-capsule.active{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 3px 8px rgba(23,92,211,.22)}
+
+/* ماژول تعرفه ریالی */
+.financial-bar{background:#f0f7ff;border:1px solid #b9d5ff;border-radius:14px;padding:12px 16px;margin:12px 0 16px}
+.financial-header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;cursor:pointer}
+.financial-header label{cursor:pointer;font-weight:700;color:#10408b}
+.financial-inputs{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px dashed #b9d5ff}
+.fin-field{display:inline-flex;align-items:center;gap:8px;font-size:13px}
+.fin-field input{border:1px solid #b9d5ff;border-radius:8px;padding:6px 10px;background:#fff;font-weight:700}
+.quality-input{width:68px;min-width:68px;text-align:center;padding:4px 6px;border:1px solid #cfd8e3;border-radius:6px;font-weight:700}
+.money-cell{font-weight:800;color:#0b572a;direction:ltr;text-align:right}
+
+#detailSection{display:none}
+.print-only{display:none}
+
+@page{size:A4 landscape;margin:10mm}
+@media print{
+ body{background:#fff;color:#000;font-size:10px}.wrap{max-width:none;padding:0}.hero{background:#fff;color:#000;box-shadow:none;border:0;padding:0;margin:0 0 8px}.hero p{color:#000}.panel{box-shadow:none;border:0;padding:0;margin:0 0 12px}.panel:not(#results){display:none!important}#results{display:block!important}
+ #results .section-title button,#results .toolbar,#results #nurseSelect,#results #summarySort,#results #clearExclusions,#results #summaryTools,.exclude-col,.indirect-tools,.screen-only,.step,.financial-bar{display:none!important}
+ .nurse-link-btn{color:#000!important;cursor:default!important}
+ .warning-link-btn{color:#000!important;text-decoration:none!important;cursor:default!important}
+ .quality-input{border:0!important;background:none!important;padding:0!important;text-align:right!important}
+ .print-only{display:block!important;margin-bottom:8px;font-weight:700;font-size:11px}
+ .stats-table{max-width:none}.stats-table td{padding:4px 6px}.stats-table td:first-child{width:45%}.stats-table td:last-child{text-align:right}
+ table{min-width:0;width:100%;font-size:9px}th,td{padding:4px 5px;white-space:normal;border:1px solid #aaa}th{background:#eee!important;color:#000}.tablewrap{overflow:visible;border:0}.section-title{margin-top:8px;break-after:avoid}h2{font-size:13px!important}.panel h2{font-size:13px!important}input,select{display:none!important}
+ .quality-input{display:inline-block!important}
+ #results[data-print-mode="single"] #indirectSection{display:none!important}
+ #results[data-print-mode="single"] #summaryTitle{display:block}
+ #results[data-print-mode="single"] #statsSection{display:none!important}
+ #results:not(.hide-print-detail) #detailSection{display:block!important}
+ #results.hide-print-detail #detailSection{display:none!important}
+ tbody tr:last-child td{border-bottom:1px solid #aaa!important}
+ .tablewrap{padding:0!important;margin:0 0 8px!important;min-height:0!important;height:auto!important}
+ table{margin:0!important;border-collapse:collapse!important;border-spacing:0!important}
+ thead{display:table-header-group}
+ tfoot{display:table-footer-group}
+ tr{break-inside:avoid;page-break-inside:avoid}
+ *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media(max-width:640px){.wrap{padding:12px}.hero{padding:18px}.hero h1{font-size:20px}.panel{padding:13px}}
+
+.settings-launcher{padding:15px 18px}.settings-launcher h2{margin-bottom:8px}
+.stats-table{max-width:780px}.stats-table td:first-child{font-weight:700;width:58%;white-space:normal}.stats-table td:last-child{font-weight:800;direction:ltr;text-align:right;font-variant-numeric:tabular-nums}
+.rule-note{padding:10px 14px;background:#f8fafc;border:1px solid var(--line);border-radius:12px;margin-top:10px;font-size:13px;line-height:1.8}
+
+.settings-dialog{width:min(1100px,calc(100% - 28px));max-width:1100px;max-height:88vh;overflow:auto;border:1px solid var(--line);border-radius:18px;padding:20px;background:var(--card);color:var(--ink);box-shadow:0 24px 80px rgba(16,24,40,.28)}
+.settings-dialog::backdrop{background:rgba(15,23,42,.55);backdrop-filter:blur(2px)}
+.dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}.dialog-head h2{margin:0 0 5px}.dialog-head p{margin:0;max-width:760px}
+.dialog-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:18px;padding-top:15px}
+#settingsStatus{display:inline-block}.settings-dialog .tablewrap{max-height:48vh;overflow:auto}.settings-dialog th{position:sticky;top:0;z-index:1}
+@media(max-width:640px){.settings-dialog{padding:13px;max-height:92vh}.dialog-head{gap:8px}.dialog-head h2{font-size:16px}.dialog-foot{align-items:stretch}.dialog-foot button{width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <h1>
+      <span>محاسبه‌گر امتیاز عملکرد و تعرفه‌گذاری پرستاری</span>
+      <span class="chip" style="background:#0f3567;color:#fff;font-size:12px;border:1px solid rgba(255,255,255,0.3)">نسخه ٢.۴</span>
+    </h1>
+    <p>محاسبه کمی عملکرد، ضرایب مصوب شیفت، آمار تفکیکی بخش‌ها و محاسبه ریالی تعرفه</p>
+  </header>
+
+  <section class="panel">
+    <h2><span class="step">مرحله ۱</span> انتخاب پوشه یا فایل‌های عملکرد پرستاران (XLS / XML)</h2>
+    <div class="row">
+      <label class="pick"><input id="folderInput" class="filebox" type="file" webkitdirectory directory multiple><button id="chooseFolder" class="primary" type="button">انتخاب پوشه پرستاران</button></label>
+      <label class="pick"><input id="fileInput" class="filebox" type="file" multiple accept=".xls,.xml,.htm,.html"><button id="chooseFiles" class="secondary" type="button">انتخاب فایل (تکی یا چندتایی)</button></label>
+      <button id="calculate" class="secondary" type="button" disabled>خواندن فایل‌ها و محاسبه امتیاز</button>
+      <button id="reset" class="secondary" type="button">شروع مجدد</button>
+    </div>
+    <div id="folderStatus" class="status">هنوز پوشه یا فایلی انتخاب نشده است.</div>
+  </section>
+
+  <section class="panel settings-launcher">
+    <h2><span class="step">مرحله ۲</span> تنظیمات امتیازها و ضرایب مصوب</h2>
+    <div class="row">
+      <button id="openSettings" type="button" class="secondary">باز کردن جدول امتیاز گروه‌ها و شیفت‌ها</button>
+      <span id="settingsStatus" class="smallnote" role="status">تنظیمات در حافظه مرورگر ذخیره می‌شوند.</span>
+    </div>
+    <div class="rule-note">
+      <strong>قوانین ضرایب شیفت طبق دستورالعمل:</strong>
+      <ul style="margin:4px 0 0;padding-right:20px">
+        <li><strong>شیفت شب (ضریب ۱٫۵):</strong> به‌صورت خودکار فقط به <strong>گروه‌های مراقبتی ۱ تا ۸</strong> تعلق می‌گیرد. بیماران تریاژ فاقد ضریب شب هستند (ضریب ۱).</li>
+        <li><strong>شیفت عصر (ضریب ۰٫۸):</strong> فقط به <strong>گروه‌های مراقبتی ۱ تا ۳</strong> تعلق دارد؛ سایر گروه‌ها ضریب ۱ دارند.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- دیالوگ تنظیمات -->
+  <dialog id="settingsDialog" class="settings-dialog" aria-labelledby="settingsDialogTitle">
+    <div class="dialog-head">
+      <div>
+        <h2 id="settingsDialogTitle">تنظیمات امتیاز گروه‌ها و ضرایب شیفت</h2>
+        <p class="sub">ضرایب عصر و شب طبق آیین‌نامه به‌صورت شرطی اعمال می‌شوند. جدول شیفت برای صبح و سایر شیفت‌های تعریف‌شده است.</p>
+      </div>
+      <button id="closeSettings" class="secondary" type="button" aria-label="بستن پنجره">بستن</button>
+    </div>
+    <div class="settings-grid">
+      <div>
+        <div class="section-title"><b>امتیاز گروه عملکرد</b><button id="addGroup" type="button" class="secondary">+ افزودن گروه</button></div>
+        <div class="tablewrap"><table id="scoresTable"><thead><tr><th>گروه عملکرد</th><th>امتیاز</th><th>حذف</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div>
+        <div class="section-title"><b>ضریب پایه شیفت‌ها</b><button id="addShift" type="button" class="secondary">+ افزودن شیفت</button></div>
+        <div class="tablewrap"><table id="shiftsTable"><thead><tr><th>شیفت</th><th>ضریب پایه</th><th>حذف</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+    <div class="dialog-foot">
+      <span class="smallnote">برای انتقال تنظیمات به سیستم دیگر، نسخه HTML به‌روزشده را دانلود کنید.</span>
+      <button id="downloadConfiguredHtml" type="button" class="primary">دانلود فایل HTML با تنظیمات فعلی</button>
+    </div>
+  </dialog>
+
+  <!-- پنجره پاپ‌آپ مشاهده جزئیات عملکرد پرسنل انتخابی -->
+  <dialog id="nurseModal" class="settings-dialog" aria-labelledby="nurseModalTitle">
+    <div class="dialog-head">
+      <div>
+        <h2 id="nurseModalTitle">جزئیات عملکرد پرستار</h2>
+        <p id="nurseModalSubtitle" class="sub"></p>
+      </div>
+      <button id="closeNurseModal" class="secondary" type="button" aria-label="بستن پنجره">بستن</button>
+    </div>
+    <div class="tablewrap" style="max-height:55vh">
+      <table id="nurseModalTable">
+        <thead>
+          <tr>
+            <th>بخش</th>
+            <th>گروه عملکرد</th>
+            <th>شیفت</th>
+            <th>مجموع مقدار</th>
+            <th>امتیاز گروه</th>
+            <th>ضریب شیفت</th>
+            <th>امتیاز محاسبه‌شده</th>
+            <th>تعداد رکورد</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="dialog-foot">
+      <span id="nurseModalFooterNote" class="smallnote"></span>
+      <button id="closeNurseModalBottom" class="primary" type="button">بستن پنجره</button>
+    </div>
+  </dialog>
+
+  <!-- پنجره پاپ‌آپ مشاهده ریز عملکرد گروه‌ها در یک بخش -->
+  <dialog id="deptModal" class="settings-dialog" aria-labelledby="deptModalTitle">
+    <div class="dialog-head">
+      <div>
+        <h2 id="deptModalTitle">ریز عملکرد گروه‌ها در بخش</h2>
+        <p id="deptModalSubtitle" class="sub"></p>
+      </div>
+      <button id="closeDeptModal" class="secondary" type="button" aria-label="بستن پنجره">بستن</button>
+    </div>
+    <div class="tablewrap" style="max-height:55vh">
+      <table id="deptModalTable">
+        <thead>
+          <tr>
+            <th>گروه عملکرد</th>
+            <th>مجموع مقدار</th>
+            <th>امتیاز گروه</th>
+            <th>امتیاز محاسبه‌شده</th>
+            <th>تعداد رکورد</th>
+            <th>موارد بررسی</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="dialog-foot">
+      <button id="closeDeptModalBottom" class="primary" type="button">بستن پنجره</button>
+    </div>
+  </dialog>
+
+  <!-- پنجره پاپ‌آپ گزارش رکوردهای نیازمند بررسی -->
+  <dialog id="warningsModal" class="settings-dialog" aria-labelledby="warningsModalTitle">
+    <div class="dialog-head">
+      <div>
+        <h2 id="warningsModalTitle">گزارش فایل‌ها یا رکوردهای نیازمند بررسی</h2>
+        <p class="sub">فهرست رکوردهایی که گروه یا شیفت نامعتبر، خالی یا مقدار تعریف‌نشده دارند.</p>
+      </div>
+      <button id="closeWarningsModal" class="secondary" type="button" aria-label="بستن پنجره">بستن</button>
+    </div>
+    <div id="warningsModalContent" class="status warn" style="max-height:55vh;overflow:auto;margin:0;white-space:pre-line;font-size:13px;line-height:1.9"></div>
+    <div class="dialog-foot">
+      <button id="closeWarningsModalBottom" class="primary" type="button">بستن پنجره</button>
+    </div>
+  </dialog>
+
+  <section id="results" class="panel" hidden>
+    <div class="section-title"><h2 style="margin:0"><span class="step">مرحله ۳</span> گزارش امتیازها و کارکرد</h2><button id="exportSummary" class="primary" type="button">خروجی گزارش پرستاران (CSV)</button></div>
+    
+    <!-- کپسول‌های انتخاب بخش -->
+    <div class="dept-filter-bar screen-only">
+      <span class="dept-filter-label">انتخاب بخش:</span>
+      <div id="deptCapsules" class="dept-capsules-wrap"></div>
+    </div>
+    <div id="printDeptHeader" class="print-only"></div>
+
+    <!-- ماژول محاسبه ریالی تعرفه -->
+    <div class="financial-bar screen-only">
+      <div class="financial-header">
+        <input type="checkbox" id="enableFinancial" style="width:18px;height:18px;accent-color:var(--blue)">
+        <label for="enableFinancial">فعال‌سازی محاسبه ارزش ریالی تعرفه (محاسبه ناخالص عملکرد)</label>
+      </div>
+      <div id="financialInputs" class="financial-inputs" style="display:none">
+        <div class="fin-field">
+          <label for="rialFactorInput">ضریب ریالی هر امتیاز (ریال):</label>
+          <input type="text" id="rialFactorInput" placeholder="مثلاً: 25,000" style="width:130px;direction:ltr">
+        </div>
+        <div class="fin-field">
+          <label for="defaultQualityInput">ضریب کیفی پیش‌فرض:</label>
+          <input type="number" id="defaultQualityInput" value="1.0" step="0.05" min="0" max="2" style="width:75px;text-align:center">
+        </div>
+        <span class="sub" style="font-size:12px;margin-right:auto">فرمول مستقیم: امتیاز کمی × ضریب کیفی × ضریب ریالی | ضریب کیفی اختصاصی هر فرد در ستون مربوطه جدول قابل ویرایش است.</span>
+      </div>
+    </div>
+
+    <div id="statsSection">
+      <div class="section-title"><h2 style="margin:0">آمار توصیفی عملکرد</h2><span class="chip">خلاصه محاسبات بر اساس فایل‌های بارگذاری‌شده</span></div>
+      <div class="tablewrap stats-table"><table id="statsTable"><thead><tr><th>شاخص آماری</th><th>مقدار</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="toolbar">
+      <label for="nurseSelect">نمایش جزئیات پرستار:</label>
+      <select id="nurseSelect"><option value="__ALL__">همه پرستاران ـ خلاصه</option></select>
+      <label class="screen-only" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--muted);margin-right:auto">
+        <input type="checkbox" id="printDetailToggle" style="width:17px;height:17px;accent-color:var(--blue)">
+        <span>شامل کردن جدول «جزئیات گروه و شیفت» در خروجی PDF/پرینت</span>
+      </label>
+      <button id="exportDetail" class="secondary" type="button">خروجی جزئیات گروه/شیفت (CSV)</button>
+      <button id="printReport" class="secondary" type="button">چاپ گزارش فعلی</button>
+    </div>
+
+    <div class="section-title"><h2 id="summaryTitle" style="margin:0">خلاصه امتیاز هر پرستار</h2><span class="chip">امتیاز کل = مجموع امتیاز رکوردها (برای مشاهده ریزعملکرد، روی نام هر فرد کلیک کنید)</span></div>
+    <div id="summaryTools" class="toolbar"><label for="summarySort">مرتب‌سازی جدول:</label><select id="summarySort"><option value="nameAsc">نام پرستار ـ حروف الفبا</option><option value="scoreAsc">امتیاز کل ـ از کم به زیاد</option><option value="scoreDesc">امتیاز کل ـ از زیاد به کم</option></select><button id="clearExclusions" class="secondary" type="button">پاک‌کردن همه تیک‌ها</button><span class="smallnote">برای محاسبه اثر حذف افراد، ستون «حذف از میانه» را تیک بزنید. این کار اطلاعات و امتیاز فرد را از گزارش اصلی پاک نمی‌کند.</span></div>
+    
+    <div class="tablewrap">
+      <table id="summaryTable">
+        <thead>
+          <tr id="summaryTableHead">
+            <th>نام پرستار</th>
+            <th>تعداد رکورد</th>
+            <th>صبح</th>
+            <th>عصر</th>
+            <th>شب</th>
+            <th>امتیاز کل</th>
+            <th class="fin-col" style="display:none">ضریب کیفی</th>
+            <th class="fin-col" style="display:none">مبلغ کارکرد (ریال)</th>
+            <th>وضعیت</th>
+            <th class="exclude-col">حذف از میانه</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div id="summaryEmpty" class="empty">هنوز گزارشی محاسبه نشده است.</div>
+    </div>
+
+    <!-- آمار کل بخش‌ها (یک ردیف برای هر بخش با امکان کلیک و مشاهده پاپ‌آپ) -->
+    <div style="margin-top:18px" class="section-title"><h2 id="groupSummaryTitle" style="margin:0">آمار کل بخش‌ها</h2><span class="chip">برای مشاهده ریز عملکرد گروه‌ها، روی نام بخش کلیک کنید</span></div>
+    <div class="tablewrap"><table id="groupSummaryTable"><thead><tr><th>بخش</th><th>مجموع مقدار</th><th>امتیاز محاسبه‌شده کل</th><th>تعداد رکورد</th><th>موارد بررسی</th></tr></thead><tbody></tbody></table><div id="groupSummaryEmpty" class="empty">بخشی برای نمایش وجود ندارد.</div></div>
+    
+    <!-- جدول جزئیات: در صفحه اصلی مخفی بوده و صرفاً در صورت انتخاب تیک مربوطه، در PDF و پرینت چاپ می‌شود -->
+    <div id="detailSection" style="margin-top:18px">
+      <div class="section-title"><h2 id="detailTitle" style="margin:0">جزئیات گروه و شیفت</h2></div>
+      <div class="tablewrap"><table id="detailTable"><thead><tr><th>نام پرسنل</th><th>بخش</th><th>گروه عملکرد</th><th>شیفت</th><th>مجموع مقدار</th><th>امتیاز گروه</th><th>ضریب شیفت</th><th>امتیاز محاسبه‌شده</th><th>تعداد رکورد</th></tr></thead><tbody></tbody></table><div id="detailEmpty" class="empty">برای نمایش جزئیات، یک پرستار را انتخاب کن.</div></div>
+    </div>
+
+    <!-- جدول عملکرد غیرمستقیم بخش -->
+    <div id="indirectSection" style="margin-top:18px">
+      <div class="section-title">
+        <h2 style="margin:0">امتیاز کارکنان با عملکرد غیرمستقیم بخش</h2>
+        <span id="indirectChip" class="chip">بر اساس میانه بخش‌های انتخابی (در حالت همه بخش‌ها: -)</span>
+      </div>
+      <div class="tablewrap">
+        <table id="indirectTable">
+          <thead>
+            <tr>
+              <th>عنوان شغلی</th>
+              <th>ضریب</th>
+              <th>امتیاز نهایی (بر اساس میانه بخش)</th>
+              <th class="fin-col" style="display:none">مبلغ برآورد ریالی</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      
+      <!-- جدول عملکرد غیرمستقیم بیمارستانی -->
+      <div style="margin-top:22px" class="section-title">
+        <h2 style="margin:0">امتیاز مشاغل با عملکرد غیرمستقیم بیمارستانی</h2>
+        <span class="chip">بر اساس میانه کل بخش‌های بیمارستان</span>
+      </div>
+      <div class="tablewrap">
+        <table id="hospitalIndirectTable">
+          <thead>
+            <tr>
+              <th>عنوان شغلی</th>
+              <th>ضریب</th>
+              <th>امتیاز نهایی (میانه کل × ضریب)</th>
+              <th class="fin-col" style="display:none">مبلغ برآورد ریالی</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    
+  </section>
+</div>
+<script type="application/json" id="embeddedSettings">{}</script>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+
+// کلید حافظه محلی نسخه 2.4
+const SETTINGS_STORAGE_KEY='nursingPerformanceSettings_v2_4:'+location.pathname;
+
+const scoreDefaults=[
+ {name:'تریاژ سطح 1',score:11},
+ {name:'تریاژ سطح 2',score:8},
+ {name:'تریاژ سطح 3',score:3.5},
+ {name:'تریاژ سطح 4',score:1.5},
+ {name:'تعداد بیمار تریاژ شده',score:0.3},
+ {name:'گروه مراقبتی 1',score:1.7},
+ {name:'گروه مراقبتی 2',score:2.3},
+ {name:'گروه مراقبتی 3',score:3},
+ {name:'گروه مراقبتی 4',score:3.7},
+ {name:'گروه مراقبتی 5',score:6.5},
+ {name:'گروه مراقبتی 6',score:13},
+ {name:'تعداد اعزام و انتقال به ازاء هر يك ساعت',score:4.8},
+ {name:'خدمات درمانگاهي سرپايي درمانگاه و آماده سازي داروي شيمي درماني بستري و سرپايي',score:1},
+ {name:'تعداد جلسات شيمي درماني سرپايي و بستري',score:3},
+ {name:'سركولار',score:0.1},
+ {name:'اسكراب',score:0.1},
+ {name:'تعداد قطع يا وصل همودياليز (جداگانه) و دياليز صفاقي',score:2},
+ {name:'ريكاوري / آماده سازي',score:1.5},
+ {name:'هوشبر',score:0.1},
+ {name:'تعداد خدمات سرپايي انواع پانسمان سوختگي،زخمهاي بستر،پاي ديابتي،ROP تزريق ماده فارماكولوژِك،اسكوپي خارح از اتاق عمل ،درمان اكسيژن پرفشار',score:2},
+ {name:'پرستار مراقب نوزاد(سزارين)',score:1.5},
+ {name:'تعداد اعزام و انتقال به ازاء هر يك ساعت اضافه',score:2.4}
+];
+const shiftDefaults=[{name:'صبح',factor:1},{name:'عصر',factor:1},{name:'شب',factor:1}];
+const indirectRoleConfig=[
+  {label:'سرپرستار / ماما مسئول',factor:1.3},
+  {label:'جانشین سرپرستار / استاف / مسئول شیفت',factor:1.1},
+  {label:'کمک‌پرستار / کمک‌بهیار',factor:0.45}
+];
+const hospitalIndirectRoleConfig=[
+  {label:'مترون',factor:1.9},
+  {label:'سوپروایزرها',factor:1.6},
+  {label:'پرستار پیگیر ، کنترل عفونت، و آموزش',factor:0.85},
+  {label:'بهیاران و پرستاران واحد تزریقات',factor:0.65}
+];
+
+function normalizeShiftSettings(items){
+  return items.map(x=>({name:String(x.name??''),factor:(norm(x.name)===norm('عصر')||norm(x.name)===norm('شب'))?1:(x.factor===null?null:num(x.factor))}))
+}
+
+function validSettings(v){
+  return !!v&&Array.isArray(v.scores)&&Array.isArray(v.shifts)&&v.scores.every(x=>x&&typeof x.name==='string'&&(x.score===null||Number.isFinite(Number(x.score))))&&v.shifts.every(x=>x&&typeof x.name==='string'&&(x.factor===null||Number.isFinite(Number(x.factor))))
+}
+
+function readEmbeddedSettings(){
+  try{
+    const el=$('embeddedSettings');
+    const v=JSON.parse(el?.textContent||'{}');
+    return validSettings(v)?v:null;
+  }catch(e){return null}
+}
+
+function loadSavedSettings(){
+  let v=null;
+  try{v=JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY)||'null')}catch(e){}
+  if(!validSettings(v))v=readEmbeddedSettings();
+  if(!v)return {scores:scoreDefaults,shifts:shiftDefaults,enableFinancial:false,rialFactor:0,defaultQuality:1.0};
+  return {
+    ...v,
+    enableFinancial:typeof v.enableFinancial==='boolean'?v.enableFinancial:false,
+    rialFactor:Number(v.rialFactor)||0,
+    defaultQuality:Number(v.defaultQuality)||1.0
+  };
+}
+
+let selectedFiles=[],allRows=[],fileIssues=[],hasCalculated=false;
+const excludedNurses=new Set();
+let isAllDepartments=true;
+const selectedDepartments=new Set();
+const nurseQualityScores=new Map();
+
+function num(v){
+  if(typeof v==='number') return v;
+  let s=String(v??'').trim().replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/٬/g,'').replace(/,/g,'').replace(/٫/g,'.').replace(/\s/g,'');
+  if(!s) return null;
+  let n=Number(s);
+  return Number.isFinite(n)?n:null;
+}
+
+function norm(s){
+  return String(s??'').normalize('NFC').replace(/[يى]/g,'ی').replace(/ك/g,'ک').replace(/[\u064B-\u065F\u0670]/g,'').replace(/[\u200c\u200e\u200f\u00a0]/g,' ').replace(/[\s\u0640]+/g,' ').trim().toLowerCase();
+}
+function normHeader(s){return norm(s).replace(/[\s\/:\\\-_.،,؛;()[\]]/g,'');}
+function pathDecode(s){try{return decodeURIComponent(s)}catch(e){return s}}
+function normPath(s){let q=pathDecode(String(s||'')).replace(/\\/g,'/');let parts=[];for(const p of q.split('/')){if(!p||p==='.')continue;if(p==='..')parts.pop();else parts.push(p)}return parts.join('/').toLowerCase();}
+function relWithoutRoot(f){let p=f.webkitRelativePath||f.name;let a=p.replace(/\\/g,'/').split('/');return a.length>1?a.slice(1).join('/'):a[0];}
+function fileMap(files){let m=new Map();for(const f of files){m.set(normPath(relWithoutRoot(f)),f);m.set(normPath(f.name),f)}return m;}
+function isCandidateDataFile(f){return /\.(xls|xml)$/i.test(f.name)&&!/^~\$/.test(f.name)}
+function getWorkbookDisplayName(txt,f){let m=txt.match(/c_rgszSh\s*\[\s*1\s*\]\s*=\s*["']([^"']+)/i);if(m){return m[1].replace(/\u00a0/g,' ').trim()}return f.name.replace(/\.(xls|xml)$/i,'')}
+function hrefsFromXls(txt){let out=[],re=/href\s*=\s*["']([^"']+?\.htm(?:l)?(?:\?[^"']*)?)["']/gi,m;while((m=re.exec(txt))!==null){let h=m[1].split('?')[0];if(!out.includes(h))out.push(h)}return out;}
+function hrefToKey(h,workbookRel){let raw=String(h||'').split(/[?#]/)[0].replace(/\\/g,'/');if(/^https?:\/\//i.test(raw)){try{let u=new URL(raw);raw=u.pathname;let seg=raw.split('/').filter(Boolean);let ix=seg.findIndex(x=>/_files$/i.test(pathDecode(x)));if(ix>=0)return normPath(seg.slice(ix).join('/'));raw=seg.slice(-2).join('/')}catch(e){}}
+let decoded=pathDecode(raw);if(decoded.startsWith('/')){let z=decoded.split('/');let i=z.findIndex(p=>/_files$/i.test(p));if(i>=0)return normPath(z.slice(i).join('/'));decoded=z.slice(-2).join('/')}
+if(decoded.includes('../')){const parent=workbookRel.split('/').slice(0,-1).join('/');return normPath(parent+'/'+decoded)}
+return normPath(decoded.replace(/^\.\//,''));}
+function parseCell(c){let t=(c?.textContent||'').replace(/\u00a0/g,' ').replace(/[\r\n\t]+/g,' ').trim();return t}
+
+function readTableFromHtml(html){
+  const doc=new DOMParser().parseFromString(html,'text/html');
+  let tables=[...doc.querySelectorAll('table')];
+  for(const table of tables){
+    let trs=[...table.querySelectorAll('tr')].filter(tr=>tr.querySelectorAll(':scope > td, :scope > th').length>0);
+    let cellsByRow=trs.map(tr=>[...tr.children].filter(c=>['TD','TH'].includes(c.tagName)).map(parseCell));
+    for(let ri=0;ri<cellsByRow.length;ri++){
+      const cells=cellsByRow[ri];
+      const hn=cells.map(normHeader);
+      let idxAmount=hn.findIndex(x=>x.includes('مقداردقیقه')||x==='مقدار');
+      let idxGroup=hn.findIndex(x=>x.includes('گروهعملکرد'));
+      let idxShift=hn.findIndex(x=>x==='شیفت'||x.includes('نوعشیفت'));
+      let idxDepartment=hn.findIndex(x=>x==='بخش'||x.includes('بخشواحد'));
+      if(idxAmount>=0&&idxGroup>=0&&idxShift>=0){
+        const idxNurse=hn.findIndex(x=>x==='پرسنل'||x.includes('نامپرسنل'));
+        const idxRow=hn.findIndex(x=>x==='ردیف');
+        let result=[];
+        for(let r=ri+1;r<cellsByRow.length;r++){
+          let vals=cellsByRow[r];
+          if(!vals.length)continue;
+          const amountText=vals[idxAmount]??'';
+          const group=String(vals[idxGroup]??'').trim();
+          const shift=String(vals[idxShift]??'').trim();
+          if(!group&&!shift&&!amountText)continue;
+          if(normHeader(group).includes('گروهعملکرد')||normHeader(shift)==='شیفت')continue;
+          let amount=num(amountText);
+          if(!group&&!shift)continue;
+          result.push({
+            amount,
+            group,
+            shift,
+            department:idxDepartment>=0?(vals[idxDepartment]||''):'',
+            sourceRow:vals[idxRow>=0?idxRow:0]||String(r+1),
+            rawNurse:idxNurse>=0?(vals[idxNurse]||''):'',
+            sourceSheet:doc.title||''
+          });
+        }
+        if(result.length)return result;
+      }
+    }
+  }
+  return null;
+}
+
+function readTableFromXml(xmlText){
+  try{
+    const parser=new DOMParser();
+    const doc=parser.parseFromString(xmlText,'application/xml');
+    if(doc.querySelector('parsererror'))return null;
+    const root=doc.documentElement;
+    if(!root)return null;
+    let rows=[...root.children];
+    if(!rows.length)return null;
+    let firstRow=rows[0];
+    let colTags=[...firstRow.children];
+    let headerMap={};
+    let isHeaderRow=false;
+    for(const el of colTags){
+      const val=normHeader(el.textContent);
+      if(val.includes('مقدار')||val.includes('گروهعملکرد')||val==='شیفت'||val.includes('نوعشیفت')){
+        isHeaderRow=true;
+        break;
+      }
+    }
+    let startIndex=0;
+    if(isHeaderRow){
+      for(const el of colTags){
+        const val=normHeader(el.textContent);
+        const tag=el.tagName;
+        if(val.includes('مقداردقیقه')||val==='مقدار') headerMap.amount=tag;
+        else if(val.includes('گروهعملکرد')) headerMap.group=tag;
+        else if(val==='شیفت'||val.includes('نوعشیفت')) headerMap.shift=tag;
+        else if(val==='بخش'||val.includes('بخشواحد')) headerMap.department=tag;
+        else if(val==='پرسنل'||val.includes('نامپرسنل')) headerMap.nurse=tag;
+      }
+      startIndex=1;
+    }else{
+      for(const el of colTags){
+        const tag=el.tagName;
+        const normTag=normHeader(tag);
+        if(normTag.includes('مقداردقیقه')||normTag==='مقدار') headerMap.amount=tag;
+        else if(normTag.includes('گروهعملکرد')) headerMap.group=tag;
+        else if(normTag==='شیفت'||normTag.includes('نوعشیفت')) headerMap.shift=tag;
+        else if(normTag==='بخش'||normTag.includes('بخشواحد')) headerMap.department=tag;
+        else if(normTag==='پرسنل'||normTag.includes('نامپرسنل')) headerMap.nurse=tag;
+      }
+    }
+    if(!headerMap.amount||!headerMap.group||!headerMap.shift) return null;
+    let result=[];
+    for(let i=startIndex;i<rows.length;i++){
+      const rowEl=rows[i];
+      const getVal=(tag)=>{
+        if(!tag)return '';
+        const child=rowEl.getElementsByTagName(tag)[0];
+        return child?parseCell(child):'';
+      };
+      const amountText=getVal(headerMap.amount);
+      const group=getVal(headerMap.group);
+      const shift=getVal(headerMap.shift);
+      const department=getVal(headerMap.department);
+      const rawNurse=getVal(headerMap.nurse);
+      if(!group&&!shift&&!amountText)continue;
+      let amount=num(amountText);
+      if(!group&&!shift)continue;
+      result.push({
+        amount,
+        group,
+        shift,
+        department,
+        sourceRow:String(i+1),
+        rawNurse,
+        sourceSheet:'XML'
+      });
+    }
+    return result.length?result:null;
+  }catch(e){
+    return null;
+  }
+}
+
+function renderEditableRows(tableId,arr,keyField,valField){
+  const body=$(tableId).querySelector('tbody');body.innerHTML='';
+  arr.forEach((x,i)=>{
+    const tr=document.createElement('tr');
+    const td1=document.createElement('td');
+    const input1=document.createElement('input');input1.type='text';input1.className='score-name';input1.value=x[keyField];input1.setAttribute('aria-label','نام');
+    input1.addEventListener('input',()=>{x[keyField]=input1.value;persistSettings()});
+    td1.appendChild(input1);
+    const td2=document.createElement('td');
+    const input2=document.createElement('input');input2.type='number';input2.step='any';input2.value=x[valField];input2.setAttribute('aria-label','مقدار');
+    input2.addEventListener('input',()=>{x[valField]=num(input2.value);persistSettings()});
+    td2.appendChild(input2);
+    const td3=document.createElement('td');
+    const b=document.createElement('button');b.className='danger';b.type='button';b.textContent='حذف';
+    b.addEventListener('click',()=>{arr.splice(i,1);renderSettings();persistSettings()});
+    td3.appendChild(b);
+    tr.append(td1,td2,td3);
+    body.appendChild(tr);
+  });
+}
+
+const savedSettings=loadSavedSettings();
+let scores=savedSettings.scores.map(x=>({name:String(x.name??''),score:x.score===null?null:num(x.score)})),shifts=normalizeShiftSettings(savedSettings.shifts);
+let enableFinancial=savedSettings.enableFinancial;
+let rialFactor=savedSettings.rialFactor;
+let defaultQuality=savedSettings.defaultQuality;
+
+function persistSettings(){
+  let saved=false;
+  try{
+    localStorage.setItem(SETTINGS_STORAGE_KEY,JSON.stringify({
+      scores,
+      shifts,
+      enableFinancial,
+      rialFactor,
+      defaultQuality
+    }));
+    saved=true;
+  }catch(e){}
+  const status=$('settingsStatus');
+  if(status)status.textContent=saved?'تنظیمات در حافظه مرورگر ذخیره شد. برای ثبت داخل فایل، نسخهٔ HTML را دانلود کنید.':'ذخیره مرورگر در دسترس نیست.';
+}
+
+function renderSettings(){renderEditableRows('scoresTable',scores,'name','score');renderEditableRows('shiftsTable',shifts,'name','factor')}
+renderSettings();
+renderIndirect();
+persistSettings();
+
+// راه‌اندازی مقادیر ماژول مالی
+$('enableFinancial').checked=enableFinancial;
+$('rialFactorInput').value=rialFactor?rialFactor.toLocaleString('en-US'):'';
+$('defaultQualityInput').value=defaultQuality;
+$('financialInputs').style.display=enableFinancial?'flex':'none';
+
+$('enableFinancial').addEventListener('change',()=>{
+  enableFinancial=$('enableFinancial').checked;
+  $('financialInputs').style.display=enableFinancial?'flex':'none';
+  persistSettings();
+  renderReports();
+});
+
+$('rialFactorInput').addEventListener('input',()=>{
+  rialFactor=num($('rialFactorInput').value)||0;
+  persistSettings();
+  renderReports();
+});
+
+$('defaultQualityInput').addEventListener('input',()=>{
+  defaultQuality=num($('defaultQualityInput').value)||1.0;
+  persistSettings();
+  renderReports();
+});
+
+const settingsDialog=$('settingsDialog');
+const nurseModal=$('nurseModal');
+const deptModal=$('deptModal');
+const warningsModal=$('warningsModal');
+
+$('openSettings').addEventListener('click',()=>{if(typeof settingsDialog.showModal==='function')settingsDialog.showModal();else settingsDialog.setAttribute('open','open')});
+$('closeSettings').addEventListener('click',()=>{if(typeof settingsDialog.close==='function')settingsDialog.close();else settingsDialog.removeAttribute('open')});
+settingsDialog.addEventListener('click',e=>{if(e.target===settingsDialog&&typeof settingsDialog.close==='function')settingsDialog.close()});
+
+$('closeNurseModal').addEventListener('click',()=>{if(typeof nurseModal.close==='function')nurseModal.close();else nurseModal.removeAttribute('open')});
+$('closeNurseModalBottom').addEventListener('click',()=>{if(typeof nurseModal.close==='function')nurseModal.close();else nurseModal.removeAttribute('open')});
+nurseModal.addEventListener('click',e=>{if(e.target===nurseModal&&typeof nurseModal.close==='function')nurseModal.close()});
+
+$('closeDeptModal').addEventListener('click',()=>{if(typeof deptModal.close==='function')deptModal.close();else deptModal.removeAttribute('open')});
+$('closeDeptModalBottom').addEventListener('click',()=>{if(typeof deptModal.close==='function')deptModal.close();else deptModal.removeAttribute('open')});
+deptModal.addEventListener('click',e=>{if(e.target===deptModal&&typeof deptModal.close==='function')deptModal.close()});
+
+$('closeWarningsModal').addEventListener('click',()=>{if(typeof warningsModal.close==='function')warningsModal.close();else warningsModal.removeAttribute('open')});
+$('closeWarningsModalBottom').addEventListener('click',()=>{if(typeof warningsModal.close==='function')warningsModal.close();else warningsModal.removeAttribute('open')});
+warningsModal.addEventListener('click',e=>{if(e.target===warningsModal&&typeof warningsModal.close==='function')warningsModal.close()});
+
+function openNurseDetailModal(nurseName){
+  const rows=allRows.filter(r=>r.nurse===nurseName);
+  $('nurseModalTitle').textContent=`جزئیات عملکرد: ${nurseName}`;
+  const totalScore=rows.reduce((sum,r)=>sum+(r.points??0),0);
+  const totalRecords=rows.length;
+  
+  let subtitle=`تعداد کل رکوردها: ${totalRecords} | امتیاز کمی کل: ${fmt(totalScore)}`;
+  if(enableFinancial&&rialFactor>0){
+    const q=nurseQualityScores.get(nurseName)??defaultQuality;
+    const money=Math.round(totalScore*q*rialFactor);
+    subtitle+=` | ضریب کیفی: ${q} | کارکرد ناخالص: ${money.toLocaleString('en-US')} ریال`;
+  }
+  $('nurseModalSubtitle').textContent=subtitle;
+  
+  const map=new Map();
+  for(const r of rows){
+    const key=[r.department,r.group,r.shift].join('||');
+    if(!map.has(key))map.set(key,{department:r.department,group:r.group,shift:r.shift,amount:0,score:r.score,factor:r.factor,points:0,count:0});
+    const x=map.get(key);
+    if(r.amount!==null)x.amount+=r.amount;
+    x.count++;
+    if(r.points!==null)x.points+=r.points;
+  }
+  const tb=$('nurseModalTable').querySelector('tbody');
+  tb.innerHTML='';
+  for(const x of map.values()){
+    const tr=document.createElement('tr');
+    [x.department||'—',x.group||'—',x.shift||'—',fmt(x.amount),fmt(x.score),fmt(x.factor),fmt(x.points),x.count].forEach(v=>makeCell(tr,v));
+    tb.appendChild(tr);
+  }
+  const warnings=rows.filter(r=>r.status!=='OK').length;
+  $('nurseModalFooterNote').textContent=warnings?`توجه: ${warnings} رکورد دارای وضعیت بررسی در اطلاعات این پرسنل وجود دارد.`:'تمامی رکوردهای این پرسنل دارای محاسبه معتبر هستند.';
+  if(typeof nurseModal.showModal==='function')nurseModal.showModal();
+  else nurseModal.setAttribute('open','open');
+}
+
+function openDeptDetailModal(deptData){
+  $('deptModalTitle').textContent=`ریز عملکرد گروه‌ها در بخش: ${deptData.department}`;
+  $('deptModalSubtitle').textContent=`مجموع مقدار: ${fmt(deptData.amount)} | امتیاز محاسبه‌شده کل: ${fmt(deptData.points)} | تعداد رکورد: ${deptData.count.toLocaleString('en-US')}`;
+  const tb=$('deptModalTable').querySelector('tbody');
+  tb.innerHTML='';
+  const sortedGroups=[...deptData.groups.values()].sort((a,b)=>a.group.localeCompare(b.group,'fa'));
+  for(const g of sortedGroups){
+    const tr=document.createElement('tr');
+    [g.group,fmt(g.amount),fmt(g.score),fmt(g.points),g.count.toLocaleString('en-US'),g.warnings?`${g.warnings} مورد`:'—'].forEach(v=>makeCell(tr,v));
+    tb.appendChild(tr);
+  }
+  if(typeof deptModal.showModal==='function')deptModal.showModal();
+  else deptModal.setAttribute('open','open');
+}
+
+function openWarningsModal(warningsList){
+  $('warningsModalContent').textContent=warningsList.join('\n');
+  if(typeof warningsModal.showModal==='function')warningsModal.showModal();
+  else warningsModal.setAttribute('open','open');
+}
+
+function downloadConfiguredHtml(){
+  persistSettings();
+  const clone=document.documentElement.cloneNode(true);
+  const embedded=clone.querySelector('#embeddedSettings');
+  if(embedded){
+    const config={
+      scores:scores.map(x=>({name:String(x.name??''),score:x.score===null?null:num(x.score)})),
+      shifts:shifts.map(x=>({name:String(x.name??''),factor:x.factor===null?null:num(x.factor)})),
+      enableFinancial,
+      rialFactor,
+      defaultQuality
+    };
+    embedded.textContent=JSON.stringify(config,null,2).replace(/</g,'\\u003c');
+  }
+  const dialog=clone.querySelector('#settingsDialog');if(dialog)dialog.removeAttribute('open');
+  const nModal=clone.querySelector('#nurseModal');if(nModal)nModal.removeAttribute('open');
+  const dModal=clone.querySelector('#deptModal');if(dModal)dModal.removeAttribute('open');
+  const wModal=clone.querySelector('#warningsModal');if(wModal)wModal.removeAttribute('open');
+  const results=clone.querySelector('#results');if(results)results.setAttribute('hidden','');
+  const status=clone.querySelector('#folderStatus');if(status){status.className='status';status.textContent='هنوز پوشه یا فایلی انتخاب نشده است.';}
+  const calc=clone.querySelector('#calculate');if(calc)calc.setAttribute('disabled','');
+  const folder=clone.querySelector('#folderInput');if(folder)folder.value='';
+  const fInput=clone.querySelector('#fileInput');if(fInput)fInput.value='';
+  clone.querySelectorAll('#scoresTable tbody,#shiftsTable tbody,#summaryTable tbody,#groupSummaryTable tbody,#detailTable tbody,#statsTable tbody,#indirectTable tbody,#hospitalIndirectTable tbody,#nurseModalTable tbody,#deptModalTable tbody').forEach(tb=>tb.innerHTML='');
+  const capsules=clone.querySelector('#deptCapsules');if(capsules)capsules.innerHTML='';
+  const nurse=clone.querySelector('#nurseSelect');if(nurse)nurse.innerHTML='<option value="__ALL__">همه پرسنل ـ گزارش کلی</option>';
+  const html='<!doctype html>\n'+clone.outerHTML;
+  const blob=new Blob([html],{type:'text/html;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='محاسبه_گر_امتیاز_پرستاری_نسخه_۲_۴.html';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+$('downloadConfiguredHtml').addEventListener('click',downloadConfiguredHtml);
+$('chooseFolder').addEventListener('click',()=>$('folderInput').click());
+$('chooseFiles').addEventListener('click',()=>$('fileInput').click());
+
+function handleSelectedFiles(files){
+  selectedFiles=[...files];
+  const books=selectedFiles.filter(isCandidateDataFile);
+  const attached=selectedFiles.filter(f=>/\.htm(l)?$/i.test(f.name)).length;
+  let msg=`فایل‌های انتخاب‌شده: ${selectedFiles.length}\nفایل‌های عملکرد (XLS / XML): ${books.length}\nفایل‌های جانبی: ${attached}`;
+  let cls='status';
+  if(!books.length){
+    msg+='\nدر انتخاب فعلی فایل داده با پسوند ‎.xls‎ یا ‎.xml‎ پیدا نشد.';
+    cls+=' warn';
+  }else{
+    msg+='\nاکنون روی «خواندن فایل‌ها و محاسبه امتیاز» کلیک کنید.';
+    cls+=' ok';
+  }
+  $('folderStatus').className=cls;
+  $('folderStatus').textContent=msg;
+  $('calculate').disabled=!books.length;
+}
+
+$('folderInput').addEventListener('change',e=>{if(e.target.files&&e.target.files.length){$('fileInput').value='';handleSelectedFiles(e.target.files);}});
+$('fileInput').addEventListener('change',e=>{if(e.target.files&&e.target.files.length){$('folderInput').value='';handleSelectedFiles(e.target.files);}});
+
+$('addGroup').addEventListener('click',()=>{scores.push({name:'گروه جدید',score:0});renderSettings();persistSettings()});$('addShift').addEventListener('click',()=>{shifts.push({name:'شیفت جدید',factor:1});renderSettings();persistSettings()});
+
+async function processFolder(){
+  fileIssues=[];allRows=[];excludedNurses.clear();
+  isAllDepartments=true;selectedDepartments.clear();
+  const files=selectedFiles;const map=fileMap(files);const books=files.filter(isCandidateDataFile);let totalBooks=0,emptyBooks=0;
+  for(let bi=0;bi<books.length;bi++){
+    const f=books[bi];$('folderStatus').textContent=`در حال خواندن فایل ${bi+1} از ${books.length}: ${f.name}`;
+    const workbookRel=relWithoutRoot(f);let content='';try{content=await f.text()}catch(e){fileIssues.push(`خواندن فایل ${f.name} ناموفق بود: ${e.message}`);continue}
+    let displayName=getWorkbookDisplayName(content,f);
+    let parsed=null,usedSheet='';
+
+    if(/\.xml$/i.test(f.name)||content.trim().startsWith('<?xml')||content.includes('<DocumentElement>')){
+      parsed=readTableFromXml(content);
+      if(parsed&&parsed.length) usedSheet='XML';
+    }
+
+    if(!parsed){
+      let refs=hrefsFromXls(content);let candidates=[];
+      for(const h of refs){
+        const key=hrefToKey(h,workbookRel);let cf=map.get(key);
+        if(!cf){const tail=key.split('/').slice(-2).join('/');cf=map.get(normPath(tail))||files.find(x=>normPath(relWithoutRoot(x)).endsWith(tail))}
+        if(cf&&/\.htm(l)?$/i.test(cf.name)&&!candidates.includes(cf))candidates.push(cf)
+      }
+      if(!candidates.length){const stem=f.name.replace(/\.xls$/i,'');const prefix=normPath(stem+'_files/');candidates=files.filter(x=>/\.htm(l)?$/i.test(x.name)&&normPath(relWithoutRoot(x)).includes(prefix))}
+      for(const cf of candidates){try{const t=await cf.text();const rows=readTableFromHtml(t);if(rows&&rows.length){parsed=rows;usedSheet=cf.name;break}}catch(e){}}
+      if(!parsed){const fallback=readTableFromHtml(content);if(fallback&&fallback.length){parsed=fallback;usedSheet=f.name}}
+    }
+
+    if(!parsed){emptyBooks++;fileIssues.push(`برای «${displayName}» جدول حاوی ستون‌های مقدار، گروه عملکرد و شیفت یافت نشد.`);continue}
+    totalBooks++;let found=0;
+    for(const r of parsed){
+      const row={
+        nurse:String(r.rawNurse||displayName).trim(),
+        amount:r.amount,
+        group:String(r.group||'').trim(),
+        shift:String(r.shift||'').trim(),
+        department:String(r.department||'').trim(),
+        sourceFile:f.name,
+        sourceSheet:usedSheet,
+        sourceRow:r.sourceRow
+      };
+      applyRowCalculation(row);allRows.push(row);found++
+    }
+    if(!found)fileIssues.push(`فایل «${displayName}» خوانده شد اما رکورد عملکردی نداشت.`)
+  }
+  renderDeptCapsules();
+  renderReports();
+  $('results').hidden=false;
+  let summary=`پردازش تمام شد.\nفایل‌های دارای داده: ${totalBooks}\nفایل‌های خالی/ناخوانا: ${emptyBooks}\nرکوردهای استخراج‌شده: ${allRows.length}`;
+  if(fileIssues.length)summary+=`\nموارد قابل بررسی: ${fileIssues.length}`;
+  $('folderStatus').className='status '+(allRows.length?'ok':'err');
+  $('folderStatus').textContent=summary;
+}
+
+$('calculate').addEventListener('click',async()=>{if(!selectedFiles.length)return;$('calculate').disabled=true;try{await processFolder()}catch(e){$('folderStatus').className='status err';$('folderStatus').textContent='خطا هنگام پردازش: '+e.message}finally{$('calculate').disabled=false}});
+
+function fmt(n){if(n===null||n===undefined||!Number.isFinite(n))return '—';return n.toLocaleString('en-US',{maximumFractionDigits:4})}
+function careGroupNumber(group){const m=norm(group).match(/گروه\s*مراقبتی\s*([0-9۰-۹٠-٩]+)/);return m?num(m[1]):null}
+
+function getShiftFactor(group,shift){
+  const sh=norm(shift), g=careGroupNumber(group);
+  if(sh===norm('عصر')){
+    return g!==null&&g>=1&&g<=3?0.8:1;
+  }
+  if(sh===norm('شب')){
+    return (g!==null&&g>=1&&g<=8)?1.5:1;
+  }
+  const obj=shifts.find(x=>norm(x.name)===sh);
+  return obj&&num(obj.factor)!==null?num(obj.factor):null;
+}
+
+function applyRowCalculation(row){
+  const scoreObj=scores.find(x=>norm(x.name)===norm(row.group));
+  row.score=scoreObj&&num(scoreObj.score)!==null?num(scoreObj.score):null;
+  row.factor=getShiftFactor(row.group,row.shift);
+  row.points=(row.amount!==null&&row.score!==null&&row.factor!==null)?row.amount*row.score*row.factor:null;
+  const problems=[];
+  if(row.amount===null)problems.push('مقدار نامعتبر');
+  if(row.score===null)problems.push('گروه تعریف‌نشده: '+(row.group||'خالی'));
+  if(row.factor===null)problems.push('شیفت تعریف‌نشده: '+(row.shift||'خالی'));
+  row.status=problems.length?problems.join('؛ '):'OK';
+}
+
+function getUniqueDepartments(){
+  const set=new Set();
+  for(const r of allRows){
+    const d=String(r.department||'').trim()||'بدون بخش';
+    set.add(d);
+  }
+  return [...set].sort((a,b)=>a.localeCompare(b,'fa'));
+}
+
+function renderDeptCapsules(){
+  const wrap=$('deptCapsules');
+  wrap.innerHTML='';
+  const depts=getUniqueDepartments();
+  if(!depts.length)return;
+  
+  const allBtn=document.createElement('div');
+  allBtn.className='dept-capsule'+(isAllDepartments?' active':'');
+  allBtn.textContent='همه بخش‌ها';
+  allBtn.addEventListener('click',()=>{
+    isAllDepartments=true;
+    selectedDepartments.clear();
+    updateCapsulesActiveState();
+    renderReports();
+  });
+  wrap.appendChild(allBtn);
+
+  depts.forEach(d=>{
+    const b=document.createElement('div');
+    b.className='dept-capsule'+((!isAllDepartments&&selectedDepartments.has(d))?' active':'');
+    b.textContent=d;
+    b.addEventListener('click',()=>{
+      if(isAllDepartments){
+        isAllDepartments=false;
+        selectedDepartments.clear();
+        selectedDepartments.add(d);
+      }else{
+        if(selectedDepartments.has(d)){
+          selectedDepartments.delete(d);
+          if(selectedDepartments.size===0) isAllDepartments=true;
+        }else{
+          selectedDepartments.add(d);
+          if(selectedDepartments.size===depts.length){
+            isAllDepartments=true;
+            selectedDepartments.clear();
+          }
+        }
+      }
+      updateCapsulesActiveState();
+      renderReports();
+    });
+    wrap.appendChild(b);
+  });
+}
+
+function updateCapsulesActiveState(){
+  const depts=getUniqueDepartments();
+  const wrap=$('deptCapsules');
+  const capsules=[...wrap.querySelectorAll('.dept-capsule')];
+  if(!capsules.length)return;
+  capsules[0].classList.toggle('active',isAllDepartments);
+  depts.forEach((d,idx)=>{
+    if(capsules[idx+1]){
+      capsules[idx+1].classList.toggle('active',!isAllDepartments&&selectedDepartments.has(d));
+    }
+  });
+}
+
+function getEffectiveRows(){
+  if(isAllDepartments) return allRows;
+  return allRows.filter(r=>{
+    const d=String(r.department||'').trim()||'بدون بخش';
+    return selectedDepartments.has(d);
+  });
+}
+
+function aggregate(rows){
+  const out=new Map();
+  for(const r of rows){
+    if(!out.has(r.nurse))out.set(r.nurse,{nurse:r.nurse,records:0,rows:0,morning:0,evening:0,night:0,total:0,warnings:0});
+    const o=out.get(r.nurse);o.rows++;
+    if(r.status!=='OK')o.warnings++;
+    if(r.points!==null){
+      o.records++;o.total+=r.points;
+      const sh=norm(r.shift);
+      if(sh===norm('صبح'))o.morning+=r.points;
+      else if(sh===norm('عصر'))o.evening+=r.points;
+      else if(sh===norm('شب'))o.night+=r.points;
+    }
+  }
+  return [...out.values()].sort((a,b)=>a.nurse.localeCompare(b.nurse,'fa'))
+}
+
+function median(values){const a=values.filter(v=>Number.isFinite(v)&&v!==0).sort((x,y)=>x-y);if(!a.length)return 0;const m=Math.floor(a.length/2);return a.length%2?a[m]:(a[m-1]+a[m])/2}
+
+function calculateMedianFromRows(targetRows){
+  const totals=new Map();
+  for(const r of targetRows){
+    if(r.points===null||!Number.isFinite(r.points))continue;
+    totals.set(r.nurse,(totals.get(r.nurse)||0)+r.points);
+  }
+  const values=[...totals.entries()].filter(([name])=>!excludedNurses.has(name)).map(([,total])=>total);
+  const nonzero=values.filter(v=>Number.isFinite(v)&&v!==0);
+  return nonzero.length?median(nonzero):null;
+}
+
+function appendStatRow(body,label,value,isHtml=false,rowClass=''){
+  const tr=document.createElement('tr');
+  if(rowClass) tr.className=rowClass;
+  const a=document.createElement('td');a.textContent=label;
+  const b=document.createElement('td');
+  if(isHtml&&typeof value==='object') b.appendChild(value);
+  else b.textContent=value;
+  tr.append(a,b);body.appendChild(tr);
+}
+
+function getWarningsList(selected,currentRows){
+  const warnings=[];
+  if(selected==='__ALL__'){
+    for(const issue of fileIssues)warnings.push(issue);
+    for(const r of currentRows.filter(x=>x.status!=='OK'))warnings.push(`${r.nurse} | ردیف ${r.sourceRow} | ${r.department||'بدون بخش'} | ${r.group||'بدون گروه'} | ${r.shift||'بدون شیفت'} | ${r.status}`);
+  }else{
+    for(const r of currentRows.filter(x=>x.nurse===selected&&x.status!=='OK'))warnings.push(`${r.nurse} | ردیف ${r.sourceRow} | ${r.department||'بدون بخش'} | ${r.group||'بدون گروه'} | ${r.shift||'بدون شیفت'} | ${r.status}`);
+  }
+  return warnings;
+}
+
+function renderStats(summaries,currentRows,selected,selectedRows){
+  const body=$('statsTable').querySelector('tbody');
+  body.innerHTML='';
+  if(selected==='__ALL__'){
+    const fullMed=median(summaries.map(x=>x.total));
+    const included=summaries.filter(x=>!excludedNurses.has(x.nurse));
+    const adjMed=included.length?median(included.map(x=>x.total)):null;
+    const change=adjMed===null?null:adjMed-fullMed;
+    const nonzeroCount=included.filter(x=>Number.isFinite(x.total)&&x.total!==0).length;
+
+    appendStatRow(body,'بخش‌های تحت نمایش',isAllDepartments?'همه بخش‌های بیمارستان':[...selectedDepartments].join('، '));
+    appendStatRow(body,'تعداد پرسنل دارای رکورد در این بخش(ها)',summaries.length.toLocaleString('en-US'));
+    appendStatRow(body,'تعداد رکوردهای عملکرد',currentRows.length.toLocaleString('en-US'));
+    appendStatRow(body,'مجموع امتیاز مستقیم پرسنل انتخابی',fmt(currentRows.reduce((sum,r)=>sum+(r.points??0),0)));
+    appendStatRow(body,'میانه امتیاز مستقیم پرسنل انتخابی (بدون صفر)',fmt(fullMed));
+    appendStatRow(body,'میانه پس از حذف افراد علامت‌گذاری‌شده',adjMed===null?'—':fmt(adjMed));
+    appendStatRow(body,'تغییر میانه نسبت به حالت بدون حذف',change===null?'—':(change>0?'+':'')+fmt(change));
+    appendStatRow(body,'تعداد افراد غیرصفر لحاظ‌شده در میانه جدید',nonzeroCount.toLocaleString('en-US'));
+
+    if(enableFinancial&&rialFactor>0){
+      let totalMoney=0;
+      for(const s of summaries){
+        const q=nurseQualityScores.get(s.nurse)??defaultQuality;
+        totalMoney+=Math.round(s.total*q*rialFactor);
+      }
+      appendStatRow(body,'مجموع کارکرد ناخالص ریالی پرسنل (ریال)',totalMoney.toLocaleString('en-US')+' ریال');
+    }
+  }else{
+    const x=summaries.find(z=>z.nurse===selected);
+    const score=x?.total??0;
+    appendStatRow(body,'نام پرسنل',selected);
+    appendStatRow(body,'تعداد رکوردهای عملکرد فرد',selectedRows.length.toLocaleString('en-US'));
+    appendStatRow(body,'امتیاز کل فرد',fmt(score));
+    appendStatRow(body,'امتیاز شیفت صبح',fmt(x?.morning??0));
+    appendStatRow(body,'امتیاز شیفت عصر',fmt(x?.evening??0));
+    appendStatRow(body,'امتیاز شیفت شب',fmt(x?.night??0));
+
+    if(enableFinancial&&rialFactor>0){
+      const q=nurseQualityScores.get(selected)??defaultQuality;
+      const money=Math.round(score*q*rialFactor);
+      appendStatRow(body,'ضریب کیفی فرد',q.toString());
+      appendStatRow(body,'مبلغ کارکرد ناخالص ریالی',money.toLocaleString('en-US')+' ریال');
+    }
+  }
+
+  // ردیف آخر: موارد نیازمند بررسی به صورت متمایز با قابلیت کلیک و باز شدن پنجره پاپ‌آپ
+  const warnings=getWarningsList(selected,currentRows);
+  if(warnings.length>0){
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='warning-link-btn';
+    btn.textContent=`${warnings.length.toLocaleString('en-US')} مورد (کلیک جهت مشاهده ریز خطاها)`;
+    btn.title='نمایش جزئیات رکوردهای نیازمند بررسی';
+    btn.addEventListener('click',()=>openWarningsModal(warnings));
+    appendStatRow(body,'موارد نیازمند بررسی / هشدارها',btn,true,'warning-stat-row');
+  }else{
+    const span=document.createElement('span');
+    span.className='good';
+    span.textContent='۰ (بدون خطا و تأیید کامل)';
+    appendStatRow(body,'موارد نیازمند بررسی / هشدارها',span,true);
+  }
+}
+
+function makeCell(tr,value,cls=''){const td=document.createElement('td');td.textContent=value;if(cls)td.className=cls;tr.appendChild(td);return td;}
+
+function renderIndirect(){
+  const body=$('indirectTable').querySelector('tbody');
+  body.innerHTML='';
+  
+  let deptMed=null;
+  if(!isAllDepartments){
+    const effRows=getEffectiveRows();
+    deptMed=calculateMedianFromRows(effRows);
+  }
+
+  for(const role of indirectRoleConfig){
+    const tr=document.createElement('tr');
+    makeCell(tr,role.label);
+    makeCell(tr,role.factor.toString());
+    if(isAllDepartments){
+      makeCell(tr,'-');
+      if(enableFinancial){
+        const td=makeCell(tr,'-','fin-col');
+        td.style.display='';
+      }
+    }else{
+      const pts=deptMed===null?null:deptMed*role.factor;
+      makeCell(tr,pts===null?'—':fmt(pts));
+      if(enableFinancial){
+        const money=(pts===null||!rialFactor)?'—':Math.round(pts*defaultQuality*rialFactor).toLocaleString('en-US')+' ریال';
+        const td=makeCell(tr,money,'fin-col money-cell');
+        td.style.display='';
+      }
+    }
+    body.appendChild(tr);
+  }
+
+  const hospBody=$('hospitalIndirectTable').querySelector('tbody');
+  hospBody.innerHTML='';
+  const totalHospitalMedian=calculateMedianFromRows(allRows);
+
+  for(const role of hospitalIndirectRoleConfig){
+    const tr=document.createElement('tr');
+    makeCell(tr,role.label);
+    makeCell(tr,role.factor.toString());
+    const pts=totalHospitalMedian===null?null:totalHospitalMedian*role.factor;
+    makeCell(tr,pts===null?'—':fmt(pts));
+    if(enableFinancial){
+      const money=(pts===null||!rialFactor)?'—':Math.round(pts*defaultQuality*rialFactor).toLocaleString('en-US')+' ریال';
+      const td=makeCell(tr,money,'fin-col money-cell');
+      td.style.display='';
+    }
+    hospBody.appendChild(tr);
+  }
+}
+
+function renderReports(){
+  const currentRows=getEffectiveRows();
+  const summaries=aggregate(currentRows);
+  
+  const deptHeaderText=isAllDepartments?'بخش‌های گزارش: همه بخش‌های بیمارستان':`بخش‌های گزارش: ${[...selectedDepartments].join('، ')}`;
+  $('printDeptHeader').textContent=deptHeaderText;
+
+  document.querySelectorAll('.fin-col').forEach(el=>{
+    el.style.display=enableFinancial?'':'none';
+  });
+
+  const sel=$('nurseSelect'),previous=sel.value;
+  sel.innerHTML='<option value="__ALL__">همه پرستاران این بخش(ها) ـ خلاصه</option>';
+  for(const x of summaries){
+    const opt=document.createElement('option');
+    opt.value=x.nurse;
+    opt.textContent=x.nurse;
+    sel.appendChild(opt);
+  }
+  if([...sel.options].some(o=>o.value===previous))sel.value=previous;
+  else sel.value='__ALL__';
+  
+  const selected=sel.value;
+  const selectedRows=selected==='__ALL__'?currentRows:currentRows.filter(r=>r.nurse===selected);
+  const baseShown=selected==='__ALL__'?summaries:summaries.filter(x=>x.nurse===selected);
+  const sortMode=$('summarySort').value;
+  const shown=[...baseShown].sort((a,b)=>{
+    if(sortMode==='scoreAsc')return a.total-b.total||a.nurse.localeCompare(b.nurse,'fa');
+    if(sortMode==='scoreDesc')return b.total-a.total||a.nurse.localeCompare(b.nurse,'fa');
+    return a.nurse.localeCompare(b.nurse,'fa');
+  });
+
+  $('summaryTitle').textContent=selected==='__ALL__'?'خلاصه امتیاز پرستاران':'خلاصه امتیاز '+selected;
+  const tb=$('summaryTable').querySelector('tbody');
+  tb.innerHTML='';
+  for(const x of shown){
+    const tr=document.createElement('tr');
+    
+    // نام پرستار بدون خط زیرین
+    const tdNurse=document.createElement('td');
+    const nurseBtn=document.createElement('button');
+    nurseBtn.type='button';
+    nurseBtn.className='nurse-link-btn';
+    nurseBtn.textContent=x.nurse;
+    nurseBtn.title='مشاهده جزئیات عملکرد این فرد در پنجره پاپ‌آپ';
+    nurseBtn.addEventListener('click',()=>openNurseDetailModal(x.nurse));
+    tdNurse.appendChild(nurseBtn);
+    tr.appendChild(tdNurse);
+    
+    [x.rows,fmt(x.morning),fmt(x.evening),fmt(x.night),fmt(x.total)].forEach(v=>makeCell(tr,v));
+
+    if(enableFinancial){
+      const tdQ=document.createElement('td');
+      tdQ.className='fin-col';
+      const qInput=document.createElement('input');
+      qInput.type='number';
+      qInput.step='0.05';
+      qInput.min='0';
+      qInput.max='2';
+      qInput.className='quality-input';
+      const currentQ=nurseQualityScores.get(x.nurse)??defaultQuality;
+      qInput.value=currentQ;
+      qInput.setAttribute('aria-label',`ضریب کیفی ${x.nurse}`);
+      
+      const tdMoney=document.createElement('td');
+      tdMoney.className='fin-col money-cell';
+      const calcMoney=q=>rialFactor?Math.round(x.total*q*rialFactor).toLocaleString('en-US'):'—';
+      tdMoney.textContent=calcMoney(currentQ);
+
+      qInput.addEventListener('input',()=>{
+        const newQ=num(qInput.value)||defaultQuality;
+        nurseQualityScores.set(x.nurse,newQ);
+        tdMoney.textContent=calcMoney(newQ);
+      });
+      qInput.addEventListener('change',()=>{
+        renderStats(summaries,currentRows,selected,selectedRows);
+      });
+
+      tdQ.appendChild(qInput);
+      tr.appendChild(tdQ);
+      tr.appendChild(tdMoney);
+    }
+
+    makeCell(tr,x.warnings?`${x.warnings} مورد بررسی`:'تأیید',x.warnings?'bad':'good');
+
+    const excludeTd=makeCell(tr,'','exclude-col');
+    excludeTd.style.textAlign='center';
+    const checkbox=document.createElement('input');
+    checkbox.type='checkbox';
+    checkbox.checked=excludedNurses.has(x.nurse);
+    checkbox.setAttribute('aria-label',`حذف ${x.nurse} از محاسبه میانه`);
+    checkbox.title=`با انتخاب این گزینه، ${x.nurse} از محاسبه میانه حذف می‌شود`;
+    checkbox.addEventListener('change',()=>{
+      if(checkbox.checked)excludedNurses.add(x.nurse);
+      else excludedNurses.delete(x.nurse);
+      renderReports();
+    });
+    excludeTd.appendChild(checkbox);
+    tb.appendChild(tr);
+  }
+  $('summaryEmpty').hidden=shown.length>0;
+
+  renderStats(summaries,currentRows,selected,selectedRows);
+  renderDetail(currentRows,selected);
+  renderIndirect();
+  updatePrintDetailClass();
+  $('results').dataset.printMode=selected==='__ALL__'?'all':'single';
+}
+
+function renderDetail(currentRows,selected){
+  const rows=selected==='__ALL__'?currentRows:currentRows.filter(r=>r.nurse===selected);
+  $('groupSummaryTitle').textContent=selected==='__ALL__'?'آمار کل بخش‌ها':'آمار بخش‌ها ـ '+selected;
+  const groupBody=$('groupSummaryTable').querySelector('tbody');
+  groupBody.innerHTML='';
+  
+  // تجمیع اطلاعات هر بخش به صورت یکجا
+  const deptMap=new Map();
+  for(const r of rows){
+    const department=r.department||'بدون بخش';
+    if(!deptMap.has(department)){
+      deptMap.set(department,{
+        department,
+        amount:0,
+        points:0,
+        count:0,
+        warnings:0,
+        groups:new Map()
+      });
+    }
+    const d=deptMap.get(department);
+    if(r.amount!==null) d.amount+=r.amount;
+    if(r.points!==null) d.points+=r.points;
+    d.count++;
+    if(r.status!=='OK') d.warnings++;
+
+    const gKey=norm(r.group||'بدون گروه');
+    if(!d.groups.has(gKey)){
+      d.groups.set(gKey,{
+        group:r.group||'بدون گروه',
+        amount:0,
+        score:r.score,
+        points:0,
+        count:0,
+        warnings:0
+      });
+    }
+    const g=d.groups.get(gKey);
+    if(r.amount!==null) g.amount+=r.amount;
+    if(r.points!==null) g.points+=r.points;
+    g.count++;
+    if(r.status!=='OK') g.warnings++;
+  }
+
+  const sortedDepts=[...deptMap.values()].sort((a,b)=>a.department.localeCompare(b.department,'fa'));
+  for(const d of sortedDepts){
+    const tr=document.createElement('tr');
+    
+    // نام بخش به صورت دکمه کلیک‌پذیر آبی
+    const tdDept=document.createElement('td');
+    const deptBtn=document.createElement('button');
+    deptBtn.type='button';
+    deptBtn.className='nurse-link-btn';
+    deptBtn.textContent=d.department;
+    deptBtn.title='مشاهده ریز عملکرد گروه‌ها در این بخش';
+    deptBtn.addEventListener('click',()=>openDeptDetailModal(d));
+    tdDept.appendChild(deptBtn);
+    tr.appendChild(tdDept);
+
+    [fmt(d.amount),fmt(d.points),d.count.toLocaleString('en-US'),d.warnings?`${d.warnings} مورد`:'—'].forEach(v=>makeCell(tr,v));
+    groupBody.appendChild(tr);
+  }
+  $('groupSummaryEmpty').hidden=sortedDepts.length>0;
+
+  $('detailTitle').textContent=selected==='__ALL__'?'جزئیات گروه و شیفت پرسنل':'جزئیات گروه و شیفت '+selected;
+  const body=$('detailTable').querySelector('tbody');
+  body.innerHTML='';
+  const map=new Map();
+  for(const r of rows){
+    const key=[r.nurse,r.department,r.group,r.shift].join('||');
+    if(!map.has(key))map.set(key,{nurse:r.nurse,department:r.department,group:r.group,shift:r.shift,amount:0,score:r.score,factor:r.factor,points:0,count:0});
+    const x=map.get(key);
+    if(r.amount!==null)x.amount+=r.amount;
+    x.count++;
+    if(r.points!==null)x.points+=r.points;
+  }
+  for(const x of map.values()){
+    const tr=document.createElement('tr');
+    [x.nurse||'—',x.department||'—',x.group||'—',x.shift||'—',fmt(x.amount),fmt(x.score),fmt(x.factor),fmt(x.points),x.count].forEach(v=>makeCell(tr,v));
+    body.appendChild(tr);
+  }
+  $('detailEmpty').hidden=map.size>0;
+  $('detailEmpty').textContent=map.size?'':'برای این گزارش جزئیاتی ثبت نشده است.';
+}
+
+$('nurseSelect').addEventListener('change',renderReports);
+$('summarySort').addEventListener('change',renderReports);
+$('clearExclusions').addEventListener('click',()=>{excludedNurses.clear();renderReports()});
+
+function updatePrintDetailClass(){
+  if($('printDetailToggle').checked){
+    $('results').classList.remove('hide-print-detail');
+  }else{
+    $('results').classList.add('hide-print-detail');
+  }
+}
+$('printDetailToggle').addEventListener('change',updatePrintDetailClass);
+
+$('printReport').addEventListener('click',()=>{
+  if(!allRows.length)return;
+  renderReports();
+  $('results').dataset.printMode=$('nurseSelect').value==='__ALL__'?'all':'single';
+  updatePrintDetailClass();
+  window.print();
+});
+window.addEventListener('afterprint',()=>{
+  $('results').dataset.printMode=$('nurseSelect').value==='__ALL__'?'all':'single';
+});
+
+function csvEscape(v){return '"'+String(v??'').replace(/"/g,'""')+'"'}
+function downloadCsv(filename,rows){const csv='\ufeff'+rows.map(r=>r.map(csvEscape).join(',')).join('\r\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
+
+$('exportSummary').addEventListener('click',()=>{
+  const ss=aggregate(getEffectiveRows());
+  const header=['نام پرستار','تعداد رکورد','امتیاز صبح','امتیاز عصر','امتیاز شب','امتیاز کل'];
+  if(enableFinancial){
+    header.push('ضریب کیفی','مبلغ کارکرد ناخالص (ریال)');
+  }
+  header.push('موارد نیازمند بررسی');
+  
+  const rows=ss.map(s=>{
+    const row=[s.nurse,s.rows,s.morning,s.evening,s.night,s.total];
+    if(enableFinancial){
+      const q=nurseQualityScores.get(s.nurse)??defaultQuality;
+      const m=rialFactor?Math.round(s.total*q*rialFactor):0;
+      row.push(q,m);
+    }
+    row.push(s.warnings);
+    return row;
+  });
+
+  downloadCsv('گزارش_امتیاز_و_تعرفه_پرستاران.csv',[header,...rows]);
+});
+
+$('exportDetail').addEventListener('click',()=>{
+  const selected=$('nurseSelect').value;
+  let rows=getEffectiveRows();
+  if(selected!=='__ALL__')rows=rows.filter(r=>r.nurse===selected);
+  const header=['نام پرستار','بخش','گروه عملکرد','شیفت','مجموع مقدار','امتیاز گروه','ضریب شیفت','امتیاز محاسبه‌شده','تعداد رکورد','وضعیت'];
+  const map=new Map();
+  for(const r of rows){
+    const key=[r.nurse,r.department,r.group,r.shift].join('||');
+    if(!map.has(key))map.set(key,{nurse:r.nurse,department:r.department,group:r.group,shift:r.shift,amount:0,score:r.score,factor:r.factor,points:0,count:0,status:[]});
+    const x=map.get(key);
+    if(r.amount!==null)x.amount+=r.amount;
+    if(r.points!==null)x.points+=r.points;
+    x.count++;
+    if(r.status!=='OK')x.status.push(r.status);
+  }
+  downloadCsv('جزئیات_امتیاز_گروه_و_شیفت.csv',[header,...[...map.values()].map(x=>[x.nurse,x.department,x.group,x.shift,x.amount,x.score,x.factor,x.points,x.count,[...new Set(x.status)].join('؛ ')||'OK'])]);
+});
+
+$('reset').addEventListener('click',()=>{
+  selectedFiles=[];
+  allRows=[];
+  fileIssues=[];
+  excludedNurses.clear();
+  nurseQualityScores.clear();
+  isAllDepartments=true;
+  selectedDepartments.clear();
+  hasCalculated=false;
+  renderIndirect();
+  $('summarySort').value='nameAsc';
+  $('folderInput').value='';
+  $('fileInput').value='';
+  $('folderStatus').className='status';
+  $('folderStatus').textContent='هنوز پوشه یا فایلی انتخاب نشده است.';
+  $('calculate').disabled=true;
+  $('results').hidden=true;
+  $('deptCapsules').innerHTML='';
+});
+})();
+</script>
+</body>
+</html>
