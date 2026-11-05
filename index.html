@@ -105,7 +105,7 @@ tr.row-excluded td.exclude-col{text-decoration:none}
       <span>محاسبه‌گر امتیاز عملکرد و تعرفه‌گذاری پرستاری</span>
       <span class="chip" style="background:#0f3567;color:#fff;font-size:12px;border:1px solid rgba(255,255,255,0.3)">نسخه ٢.۵</span>
     </h1>
-    <p>محاسبه کمی عملکرد، ضرایب مصوب شیفت، ضریب حضور پرسنل غیرمستقیم، آمار تفکیکی بخش‌ها و تعرفه ریالی</p>
+    <p>محاسبه کمی عملکرد، ضرایب مصوب شیفت، ضریب حضور پرسنل غیرمستقیم، تفکیک واحدها و تعرفه ریالی</p>
   </header>
 
   <section class="panel">
@@ -126,10 +126,10 @@ tr.row-excluded td.exclude-col{text-decoration:none}
       <span id="settingsStatus" class="smallnote" role="status">تنظیمات در حافظه مرورگر ذخیره می‌شوند.</span>
     </div>
     <div class="rule-note">
-      <strong>قوانین ضرایب شیفت طبق دستورالعمل:</strong>
+      <strong>قوانین ضرایب شیفت و حضور طبق دستورالعمل:</strong>
       <ul style="margin:4px 0 0;padding-right:20px">
-        <li><strong>شیفت شب (ضریب ۱٫۵):</strong> به‌صورت خودکار فقط به <strong>گروه‌های مراقبتی ۱ تا ۸</strong> تعلق می‌گیرد. بیماران تریاژ فاقد ضریب شب هستند (ضریب ۱).</li>
-        <li><strong>شیفت عصر (ضریب ۰٫۸):</strong> فقط به <strong>گروه‌های مراقبتی ۱ تا ۳</strong> تعلق دارد؛ سایر گروه‌ها ضریب ۱ دارند.</li>
+        <li><strong>شیفت شب (ضریب ۱٫۵):</strong> فقط به گروه‌های مراقبتی ۱ تا ۸ تعلق می‌گیرد (بیماران تریاژ ضریب ۱ دارند).</li>
+        <li><strong>شیفت عصر (ضریب ۰٫۸):</strong> فقط به گروه‌های مراقبتی ۱ تا ۳ تعلق دارد؛ سایر گروه‌ها ضریب ۱ دارند.</li>
         <li><strong>ضریب حضور عملکرد غیرمستقیم:</strong> برای رده‌های سرپرستار، استاف، سوپروایزرها و مترون در بازه <strong>۰ تا ۱٫۲۵</strong> و برای کمک‌پرستار/کمک‌بهیار در بازه <strong>۰ تا ۲٫۰</strong> اعمال می‌گردد.</li>
       </ul>
     </div>
@@ -241,7 +241,7 @@ tr.row-excluded td.exclude-col{text-decoration:none}
     
     <!-- کپسول‌های انتخاب بخش -->
     <div class="dept-filter-bar screen-only">
-      <span class="dept-filter-label">انتخاب بخش:</span>
+      <span class="dept-filter-label">انتخاب بخش/واحد:</span>
       <div id="deptCapsules" class="dept-capsules-wrap"></div>
     </div>
     <div id="printDeptHeader" class="print-only"></div>
@@ -261,7 +261,7 @@ tr.row-excluded td.exclude-col{text-decoration:none}
           <label for="defaultQualityInput">ضریب کیفی پیش‌فرض:</label>
           <input type="number" id="defaultQualityInput" value="1.0" step="0.05" min="0" max="2" style="width:75px;text-align:center">
         </div>
-        <span class="sub" style="font-size:12px;margin-right:auto">فرمول مستقیم: امتیاز کمی × ضریب کیفی × ضریب ریالی | ضریب کیفی اختصاصی هر فرد در ستون جدول قابل ویرایش است.</span>
+        <span class="sub" style="font-size:12px;margin-right:auto">فرمول مستقیم: امتیاز کمی × ضریب کیفی × ضریب ریالی</span>
       </div>
     </div>
 
@@ -306,7 +306,7 @@ tr.row-excluded td.exclude-col{text-decoration:none}
     </div>
 
     <!-- آمار کل بخش‌ها -->
-    <div style="margin-top:18px" class="section-title"><h2 id="groupSummaryTitle" style="margin:0">آمار کل بخش‌ها</h2><span class="chip">برای مشاهده ریز عملکرد گروه‌ها، روی نام بخش کلیک کنید</span></div>
+    <div style="margin-top:18px" class="section-title"><h2 id="groupSummaryTitle" style="margin:0">آمار بخش‌ها / واحدها</h2><span class="chip">برای مشاهده ریز عملکرد گروه‌ها، روی نام بخش کلیک کنید</span></div>
     <div class="tablewrap"><table id="groupSummaryTable"><thead><tr><th>بخش</th><th>مجموع مقدار</th><th>امتیاز محاسبه‌شده کل</th><th>تعداد رکورد</th><th>موارد بررسی</th></tr></thead><tbody></tbody></table><div id="groupSummaryEmpty" class="empty">بخشی برای نمایش وجود ندارد.</div></div>
     
     <!-- جدول جزئیات -->
@@ -319,7 +319,7 @@ tr.row-excluded td.exclude-col{text-decoration:none}
     <div id="indirectSection" style="margin-top:18px">
       <div class="section-title">
         <h2 style="margin:0">امتیاز کارکنان با عملکرد غیرمستقیم بخش</h2>
-        <span id="indirectChip" class="chip">بر اساس میانه بخش‌های انتخابی (در حالت همه بخش‌ها: -)</span>
+        <span id="indirectChip" class="chip">بر اساس میانه بخش/واحدهای انتخابی</span>
       </div>
       <div class="tablewrap">
         <table id="indirectTable">
@@ -336,11 +336,11 @@ tr.row-excluded td.exclude-col{text-decoration:none}
         </table>
       </div>
       
-      <!-- جدول عملکرد غیرمستقیم بیمارستانی -->
+      <!-- جدول عملکرد غیرمستقیم بیمارستانی (فقط در حالت کل بیمارستان نمایش و چاپ می‌شود) -->
       <div id="hospitalIndirectSection" style="margin-top:22px">
         <div class="section-title">
-          <h2 style="margin:0">امتیاز مشاغل با عملکرد غیرمستقیم بیمارستانی</h2>
-          <span class="chip">بر اساس میانه کل بخش‌های بیمارستان</span>
+          <h2 style="margin:0">امتیاز مشاغل با عملکرد غیرمستقیم بیمارستانی (کل مرکز)</h2>
+          <span class="chip">صرفاً بر اساس میانه کل بخش‌های بیمارستان</span>
         </div>
         <div class="tablewrap">
           <table id="hospitalIndirectTable">
@@ -349,7 +349,7 @@ tr.row-excluded td.exclude-col{text-decoration:none}
                 <th>عنوان شغلی</th>
                 <th>ضریب شغل</th>
                 <th>ضریب حضور (سقف 1.25)</th>
-                <th>امتیاز نهایی (میانه کل × شغل × حضور)</th>
+                <th>امتیاز نهایی (میانه کل مرکز × شغل × حضور)</th>
                 <th class="fin-col" style="display:none">مبلغ برآورد ریالی</th>
               </tr>
             </thead>
@@ -474,19 +474,15 @@ if(decoded.includes('../')){const parent=workbookRel.split('/').slice(0,-1).join
 return normPath(decoded.replace(/^\.\//,''));}
 function parseCell(c){let t=(c?.textContent||String(c||'')).replace(/\u00a0/g,' ').replace(/[\r\n\t]+/g,' ').trim();return t}
 
-// تحلیل جنریک آرایه‌های دوبعدی با اولویت قطعی ستون گروه عملکرد
+// تحلیل آرایه‌های داده با اولویت قطعی ستون گروه عملکرد و شماره ردیف صحیح
 function parse2DArray(rows, sourceSheet=''){
   for(let ri=0;ri<rows.length;ri++){
     const cells=(rows[ri]||[]).map(parseCell);
     const hn=cells.map(normHeader);
     
     let idxAmount=hn.findIndex(x=>x.includes('مقداردقیقه')||x==='مقدار'||x.includes('تعداد'));
-    
-    // ۱. اولویت نخست قطعی با ستون گروه عملکرد است
     let idxGroup=hn.findIndex(x=>x.includes('گروهعملکرد'));
-    // ۲. ستون عنوان عملکرد به عنوان جایگزین
     let idxTitle=hn.findIndex(x=>x.includes('عنوانعملکرد')||x.includes('شرحعملکرد'));
-    
     let idxShift=hn.findIndex(x=>x==='شیفت'||x.includes('نوعشیفت'));
     let idxDepartment=hn.findIndex(x=>x==='بخش'||x.includes('بخشواحد')||x.includes('نامبخش'));
     let idxNurse=hn.findIndex(x=>x==='پرسنل'||x.includes('نامپرسنل')||x.includes('پرستار'));
@@ -502,7 +498,6 @@ function parse2DArray(rows, sourceSheet=''){
         
         const amountText=vals[idxAmount]??'';
         
-        // ابتدا گروه عملکرد؛ اگر خالی بود عنوان عملکرد
         let group='';
         if(idxGroup>=0 && vals[idxGroup]!==undefined && String(vals[idxGroup]).trim()!==''){
           group=String(vals[idxGroup]).trim();
@@ -520,7 +515,6 @@ function parse2DArray(rows, sourceSheet=''){
         let amount=num(amountText);
         if(!group&&!shift)continue;
         
-        // شماره ردیف صحیح
         const rowNumber = (idxRow>=0 && vals[idxRow]!==undefined && String(vals[idxRow]).trim()!=='')
           ? String(vals[idxRow]).trim()
           : String(r+1);
@@ -876,7 +870,7 @@ $('addGroup').addEventListener('click',()=>{scores.push({name:'گروه جدید
 
 async function processFolder(){
   fileIssues=[];allRows=[];excludedNurses.clear();
-  isAllDepartments=true;selectedDepartments.clear();
+  selectedDepartments.clear();
   const files=selectedFiles;const map=fileMap(files);const books=files.filter(isCandidateDataFile);let totalBooks=0,emptyBooks=0;
   for(let bi=0;bi<books.length;bi++){
     const f=books[bi];$('folderStatus').textContent=`در حال خواندن فایل ${bi+1} از ${books.length}: ${f.name}`;
@@ -884,7 +878,6 @@ async function processFolder(){
     let displayName=f.name.replace(/\.(xlsx|xls|xml|csv)$/i,'');
     let parsed=null,usedSheet='';
 
-    // ۱. پردازش فایل‌های مدرن اکسل XLSX
     if(/\.xlsx$/i.test(f.name)){
       try{
         const buf=await f.arrayBuffer();
@@ -907,7 +900,6 @@ async function processFolder(){
         fileIssues.push(`خطا در پردازش فایل اکسل ${f.name}: ${err.message}`);
       }
     }
-    // ۲. پردازش فایل‌های متنی CSV
     else if(/\.csv$/i.test(f.name)){
       try{
         const txt=await f.text();
@@ -920,7 +912,6 @@ async function processFolder(){
         fileIssues.push(`خطا در خواندن فایل CSV ${f.name}: ${err.message}`);
       }
     }
-    // ۳. فایل‌های XML و XLS سنتی مبتنی بر HTML
     else{
       let content='';
       try{content=await f.text()}catch(e){fileIssues.push(`خواندن فایل ${f.name} ناموفق بود: ${e.message}`);continue}
@@ -961,6 +952,16 @@ async function processFolder(){
     }
     if(!found)fileIssues.push(`فایل «${displayName}» خوانده شد اما رکورد عملکردی نداشت.`)
   }
+
+  // اگر تمام داده‌ها مربوط به ۱ بخش باشد، به صورت پیش‌فرض همان بخش فعال می‌شود تا غیرمستقیم همان بخش محاسبه شود
+  const uniqueDepts=getUniqueDepartments();
+  if(uniqueDepts.length===1){
+    isAllDepartments=false;
+    selectedDepartments.add(uniqueDepts[0]);
+  }else{
+    isAllDepartments=true;
+  }
+
   renderDeptCapsules();
   renderReports();
   $('results').hidden=false;
@@ -1008,15 +1009,18 @@ function getUniqueDepartments(){
   return [...set].sort((a,b)=>a.localeCompare(b,'fa'));
 }
 
+// رندر کپسول‌ها با حذف انتقال اتوماتیک به «کل بیمارستان» در زمان انتخاب دستی همه واحدها
 function renderDeptCapsules(){
   const wrap=$('deptCapsules');
   wrap.innerHTML='';
   const depts=getUniqueDepartments();
   if(!depts.length)return;
   
+  // کپسول همه بخش‌ها به منزله کل بیمارستان است
   const allBtn=document.createElement('div');
   allBtn.className='dept-capsule'+(isAllDepartments?' active':'');
-  allBtn.textContent='همه بخش‌ها';
+  allBtn.textContent='همه بخش‌ها (کل بیمارستان)';
+  allBtn.title='مشاهده آمار جامع و محاسبه غیرمستقیم بیمارستانی (مترون/سوپروایزر)';
   allBtn.addEventListener('click',()=>{
     isAllDepartments=true;
     selectedDepartments.clear();
@@ -1025,25 +1029,27 @@ function renderDeptCapsules(){
   });
   wrap.appendChild(allBtn);
 
+  // کپسول واحدهای تفکیکی
   depts.forEach(d=>{
     const b=document.createElement('div');
     b.className='dept-capsule'+((!isAllDepartments&&selectedDepartments.has(d))?' active':'');
     b.textContent=d;
     b.addEventListener('click',()=>{
       if(isAllDepartments){
+        // خروج صریح از حالت کل بیمارستان و ورود به حالت بخش انتخابی
         isAllDepartments=false;
         selectedDepartments.clear();
         selectedDepartments.add(d);
       }else{
         if(selectedDepartments.has(d)){
           selectedDepartments.delete(d);
-          if(selectedDepartments.size===0) isAllDepartments=true;
-        }else{
-          selectedDepartments.add(d);
-          if(selectedDepartments.size===depts.length){
+          // اگر کاربر همه را از حالت انتخاب خارج کرد، به حالت کل بیمارستان برمی‌گردد
+          if(selectedDepartments.size===0){
             isAllDepartments=true;
-            selectedDepartments.clear();
           }
+        }else{
+          // افزودن واحد جدید به انتخاب‌های جاری بدون سوئیچ اتوماتیک به کل بیمارستان
+          selectedDepartments.add(d);
         }
       }
       updateCapsulesActiveState();
@@ -1137,7 +1143,7 @@ function renderStats(summaries,currentRows,selected,selectedRows){
     const activeDirectTotal=activeRows.reduce((sum,r)=>sum+(r.points??0),0);
     const nonzeroCount=activeSummaries.filter(x=>Number.isFinite(x.total)&&x.total!==0).length;
 
-    appendStatRow(body,'بخش‌های تحت نمایش',isAllDepartments?'همه بخش‌های بیمارستان':[...selectedDepartments].join('، '));
+    appendStatRow(body,'بخش‌های تحت نمایش',isAllDepartments?'همه بخش‌های بیمارستان (کل مرکز)':[...selectedDepartments].join('، '));
     appendStatRow(body,'تعداد پرسنل فعال (لحاظ‌شده در آمار)',activeSummaries.length.toLocaleString('en-US')+(excludedCount?` (${excludedCount} نفر حذف‌شده)`:''));
     appendStatRow(body,'تعداد رکوردهای عملکرد پرسنل فعال',activeRows.length.toLocaleString('en-US'));
     appendStatRow(body,'مجموع امتیاز مستقیم پرسنل فعال',fmt(activeDirectTotal));
@@ -1194,10 +1200,14 @@ function renderIndirect(){
   const body=$('indirectTable').querySelector('tbody');
   body.innerHTML='';
   
+  // محاسبه میانه برای بخش یا واحدهای انتخابی
   let deptMed=null;
   if(!isAllDepartments){
     const effRows=getEffectiveRows();
     deptMed=calculateMedianFromRows(effRows);
+    $('indirectChip').textContent=`بر اساس میانه واحدهای انتخابی (${[...selectedDepartments].join('، ')})`;
+  }else{
+    $('indirectChip').textContent='در حالت کل بیمارستان، لطفاً جهت محاسبه کارکرد سرپرستار/بخش، واحد مورد نظر را انتخاب کنید';
   }
 
   for(const role of indirectRoleConfig){
@@ -1253,6 +1263,7 @@ function renderIndirect(){
     body.appendChild(tr);
   }
 
+  // جدول غیرمستقیم بیمارستانی (تنها زمانی که کل بیمارستان انتخاب باشد نمایش و چاپ می‌گردد)
   const hospSection=$('hospitalIndirectSection');
   if(hospSection){
     hospSection.style.display=isAllDepartments?'block':'none';
@@ -1315,7 +1326,7 @@ function renderReports(){
   const currentRows=getEffectiveRows();
   const summaries=aggregate(currentRows);
   
-  const deptHeaderText=isAllDepartments?'بخش‌های گزارش: همه بخش‌های بیمارستان':`بخش‌های گزارش: ${[...selectedDepartments].join('، ')}`;
+  const deptHeaderText=isAllDepartments?'بخش‌های گزارش: همه بخش‌های بیمارستان (کل مرکز)':`بخش‌های گزارش: ${[...selectedDepartments].join('، ')}`;
   $('printDeptHeader').textContent=deptHeaderText;
 
   document.querySelectorAll('.fin-col').forEach(el=>{
@@ -1423,7 +1434,7 @@ function renderReports(){
 
 function renderDetail(currentRows,selected){
   const rows=selected==='__ALL__'?currentRows:currentRows.filter(r=>r.nurse===selected);
-  $('groupSummaryTitle').textContent=selected==='__ALL__'?'آمار کل بخش‌ها':'آمار بخش‌ها ـ '+selected;
+  $('groupSummaryTitle').textContent=selected==='__ALL__'?'آمار بخش‌ها / واحدها':'آمار واحدها ـ '+selected;
   const groupBody=$('groupSummaryTable').querySelector('tbody');
   groupBody.innerHTML='';
   
