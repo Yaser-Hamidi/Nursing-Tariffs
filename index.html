@@ -336,7 +336,7 @@ tr.row-excluded td.exclude-col{text-decoration:none}
         </table>
       </div>
       
-      <!-- جدول عملکرد غیرمستقیم بیمارستانی (فقط در حالت کل بیمارستان نمایش و چاپ می‌شود) -->
+      <!-- جدول عملکرد غیرمستقیم بیمارستانی -->
       <div id="hospitalIndirectSection" style="margin-top:22px">
         <div class="section-title">
           <h2 style="margin:0">امتیاز مشاغل با عملکرد غیرمستقیم بیمارستانی (کل مرکز)</h2>
@@ -472,12 +472,24 @@ function hrefToKey(h,workbookRel){let raw=String(h||'').split(/[?#]/)[0].replace
 let decoded=pathDecode(raw);if(decoded.startsWith('/')){let z=decoded.split('/');let i=z.findIndex(p=>/_files$/i.test(p));if(i>=0)return normPath(z.slice(i).join('/'));decoded=z.slice(-2).join('/')}
 if(decoded.includes('../')){const parent=workbookRel.split('/').slice(0,-1).join('/');return normPath(parent+'/'+decoded)}
 return normPath(decoded.replace(/^\.\//,''));}
-function parseCell(c){let t=(c?.textContent||String(c||'')).replace(/\u00a0/g,' ').replace(/[\r\n\t]+/g,' ').trim();return t}
 
-// تحلیل آرایه‌های داده با اولویت قطعی ستون گروه عملکرد و شماره ردیف صحیح
+// استخراج متن خالص با پشتیبانی کامل از عناصر DOM، اعداد و رشته‌ها
+function parseCell(c){
+  if(c===null||c===undefined) return '';
+  let text='';
+  if(typeof c==='object'&&('textContent' in c)){
+    text=c.textContent||'';
+  }else{
+    text=String(c);
+  }
+  return text.replace(/\u00a0/g,' ').replace(/[\r\n\t]+/g,' ').trim();
+}
+
+// تحلیل آرایه‌های داده بدون ورود اشیاء DOM و تضمین رشته خالص
 function parse2DArray(rows, sourceSheet=''){
   for(let ri=0;ri<rows.length;ri++){
-    const cells=(rows[ri]||[]).map(parseCell);
+    const rawRow=rows[ri]||[];
+    const cells=rawRow.map(parseCell);
     const hn=cells.map(normHeader);
     
     let idxAmount=hn.findIndex(x=>x.includes('مقداردقیقه')||x==='مقدار'||x.includes('تعداد'));
@@ -493,21 +505,23 @@ function parse2DArray(rows, sourceSheet=''){
     if(idxAmount>=0 && effectiveGroupCol>=0){
       let result=[];
       for(let r=ri+1;r<rows.length;r++){
-        let vals=rows[r];
-        if(!vals||!vals.length)continue;
+        let rawVals=rows[r];
+        if(!rawVals||!rawVals.length)continue;
+        // تبدیل تک‌تک خانه‌های ردیف به رشته متنی تمیز
+        let vals=rawVals.map(parseCell);
         
         const amountText=vals[idxAmount]??'';
         
         let group='';
-        if(idxGroup>=0 && vals[idxGroup]!==undefined && String(vals[idxGroup]).trim()!==''){
-          group=String(vals[idxGroup]).trim();
-        }else if(idxTitle>=0 && vals[idxTitle]!==undefined && String(vals[idxTitle]).trim()!==''){
-          group=String(vals[idxTitle]).trim();
+        if(idxGroup>=0 && vals[idxGroup]!==undefined && vals[idxGroup]!==''){
+          group=vals[idxGroup];
+        }else if(idxTitle>=0 && vals[idxTitle]!==undefined && vals[idxTitle]!==''){
+          group=vals[idxTitle];
         }
 
-        const shift=idxShift>=0?String(vals[idxShift]??'').trim():'صبح';
-        const rawNurse=idxNurse>=0?String(vals[idxNurse]??'').trim():'';
-        const department=idxDepartment>=0?String(vals[idxDepartment]??'').trim():'';
+        const shift=idxShift>=0?vals[idxShift]:'صبح';
+        const rawNurse=idxNurse>=0?vals[idxNurse]:'';
+        const department=idxDepartment>=0?vals[idxDepartment]:'';
         
         if(!group&&!shift&&!amountText)continue;
         if(normHeader(group).includes('گروهعملکرد')||normHeader(shift)==='شیفت')continue;
@@ -515,8 +529,8 @@ function parse2DArray(rows, sourceSheet=''){
         let amount=num(amountText);
         if(!group&&!shift)continue;
         
-        const rowNumber = (idxRow>=0 && vals[idxRow]!==undefined && String(vals[idxRow]).trim()!=='')
-          ? String(vals[idxRow]).trim()
+        const rowNumber = (idxRow>=0 && vals[idxRow]!==undefined && vals[idxRow]!=='')
+          ? vals[idxRow]
           : String(r+1);
 
         result.push({
@@ -540,7 +554,8 @@ function readTableFromHtml(html){
   let tables=[...doc.querySelectorAll('table')];
   for(const table of tables){
     let trs=[...table.querySelectorAll('tr')].filter(tr=>tr.querySelectorAll(':scope > td, :scope > th').length>0);
-    let cellsByRow=trs.map(tr=>[...tr.children].filter(c=>['TD','TH'].includes(c.tagName)).map(parseCell));
+    // استخراج متنی سلول‌ها برای جلوگیری از انتقال آبجکت HTMLTableCellElement
+    let cellsByRow=trs.map(tr=>[...tr.children].filter(c=>['TD','TH'].includes(c.tagName)).map(c=>parseCell(c)));
     const res=parse2DArray(cellsByRow, doc.title||'HTML');
     if(res) return res;
   }
@@ -582,7 +597,7 @@ function readTableFromXml(xmlText){
     let headerMap={};
     let isHeaderRow=false;
     for(const el of colTags){
-      const val=normHeader(el.textContent);
+      const val=normHeader(parseCell(el));
       if(val.includes('مقدار')||val.includes('گروهعملکرد')||val==='شیفت'||val.includes('نوعشیفت')){
         isHeaderRow=true;
         break;
@@ -591,7 +606,7 @@ function readTableFromXml(xmlText){
     let startIndex=0;
     if(isHeaderRow){
       for(const el of colTags){
-        const val=normHeader(el.textContent);
+        const val=normHeader(parseCell(el));
         const tag=el.tagName;
         if(val.includes('مقداردقیقه')||val==='مقدار'||val.includes('تعداد')) headerMap.amount=tag;
         else if(val.includes('گروهعملکرد')) headerMap.group=tag;
@@ -627,7 +642,6 @@ function readTableFromXml(xmlText){
       const amountText=getVal(headerMap.amount);
       let group=getVal(headerMap.group);
       if(!group&&headerMap.title) group=getVal(headerMap.title);
-      group=String(group||'').trim();
 
       const shift=headerMap.shift?getVal(headerMap.shift):'صبح';
       const department=getVal(headerMap.department);
@@ -642,7 +656,7 @@ function readTableFromXml(xmlText){
         group,
         shift:shift||'صبح',
         department,
-        sourceRow:rowVal?String(rowVal).trim():String(i+1),
+        sourceRow:rowVal?rowVal:String(i+1),
         rawNurse,
         sourceSheet:'XML'
       });
@@ -953,7 +967,6 @@ async function processFolder(){
     if(!found)fileIssues.push(`فایل «${displayName}» خوانده شد اما رکورد عملکردی نداشت.`)
   }
 
-  // اگر تمام داده‌ها مربوط به ۱ بخش باشد، به صورت پیش‌فرض همان بخش فعال می‌شود تا غیرمستقیم همان بخش محاسبه شود
   const uniqueDepts=getUniqueDepartments();
   if(uniqueDepts.length===1){
     isAllDepartments=false;
@@ -1009,14 +1022,12 @@ function getUniqueDepartments(){
   return [...set].sort((a,b)=>a.localeCompare(b,'fa'));
 }
 
-// رندر کپسول‌ها با حذف انتقال اتوماتیک به «کل بیمارستان» در زمان انتخاب دستی همه واحدها
 function renderDeptCapsules(){
   const wrap=$('deptCapsules');
   wrap.innerHTML='';
   const depts=getUniqueDepartments();
   if(!depts.length)return;
   
-  // کپسول همه بخش‌ها به منزله کل بیمارستان است
   const allBtn=document.createElement('div');
   allBtn.className='dept-capsule'+(isAllDepartments?' active':'');
   allBtn.textContent='همه بخش‌ها (کل بیمارستان)';
@@ -1029,26 +1040,22 @@ function renderDeptCapsules(){
   });
   wrap.appendChild(allBtn);
 
-  // کپسول واحدهای تفکیکی
   depts.forEach(d=>{
     const b=document.createElement('div');
     b.className='dept-capsule'+((!isAllDepartments&&selectedDepartments.has(d))?' active':'');
     b.textContent=d;
     b.addEventListener('click',()=>{
       if(isAllDepartments){
-        // خروج صریح از حالت کل بیمارستان و ورود به حالت بخش انتخابی
         isAllDepartments=false;
         selectedDepartments.clear();
         selectedDepartments.add(d);
       }else{
         if(selectedDepartments.has(d)){
           selectedDepartments.delete(d);
-          // اگر کاربر همه را از حالت انتخاب خارج کرد، به حالت کل بیمارستان برمی‌گردد
           if(selectedDepartments.size===0){
             isAllDepartments=true;
           }
         }else{
-          // افزودن واحد جدید به انتخاب‌های جاری بدون سوئیچ اتوماتیک به کل بیمارستان
           selectedDepartments.add(d);
         }
       }
@@ -1200,7 +1207,6 @@ function renderIndirect(){
   const body=$('indirectTable').querySelector('tbody');
   body.innerHTML='';
   
-  // محاسبه میانه برای بخش یا واحدهای انتخابی
   let deptMed=null;
   if(!isAllDepartments){
     const effRows=getEffectiveRows();
@@ -1263,7 +1269,6 @@ function renderIndirect(){
     body.appendChild(tr);
   }
 
-  // جدول غیرمستقیم بیمارستانی (تنها زمانی که کل بیمارستان انتخاب باشد نمایش و چاپ می‌گردد)
   const hospSection=$('hospitalIndirectSection');
   if(hospSection){
     hospSection.style.display=isAllDepartments?'block':'none';
